@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pc Midia</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="./css/loading-screen.css">
+    <link rel="stylesheet" href="./css/inativeTv.css">
+    <link rel="stylesheet" href="./css/jquery/jquery-ui.min.css">
+    <link rel="stylesheet" href="./css/jquery/jquery-ui.theme.min.css">
+    <link rel="stylesheet" href="./css/font-personalized.css">
+    <link rel="stylesheet" href="./css/open-sans.css">
+
+</head>
+<body class="cusor-pointer-none">
+    <div id="loading" class="loading">
+        <div class="loading-bar">Loading</div>
+    </div>
+    <div id="pos-loading" class="container pos-loading" style="display: none;">
+        <div class="container">
+            <video autoplay muted loop id="background"> <source src="../src/background.mp4" type="video/webm"></video>
+            <div class="card">
+                <h3 id="text" class="text-center">Sem licença para reproduzir conteúdo, por favor entre em contato em nosso site: sistema.pcmidiaooh.com.br</h3>
+            </div>
+            <!--<h2 style=" position: absolute; bottom: 0%; left: 1%; color: #858585; ">Versão de Teste <span id="version-app"></span></h2>-->
+            <h2 id="download-dependences" style=" position: absolute; bottom: 0%; right: 1%; color: #858585;"></h2>
+        </div>
+    </div>
+
+    <script src="../src/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../src/jquery/jquery.min.js"></script>
+    <script src="../src/jquery/jquery-ui.min.js"></script>
+    <script src="../src/jquery/jquery.mask.min.js"></script>
+    <script src="./js/BackImplemt.js"></script>
+    <script src="./js/inativeTv.js"></script>
+</body>
+</html>

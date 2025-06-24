@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Pc Midia</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+    <link rel="stylesheet" href="./css/loading-screen.css">
+    <link rel="stylesheet" href="./css/player.css">
+    <link rel="stylesheet" href="./css/spinner.css">
+    <link rel="stylesheet" href="./css/jquery/jquery-ui.min.css">
+    <link rel="stylesheet" href="./css/jquery/jquery-ui.theme.min.css">
+    <link rel="stylesheet" href="./css/font-personalized.css">
+    <link rel="stylesheet" href="./css/open-sans.css">
+
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="pragma" content="no-cache" />
+
+</head>
+<body class="cusor-pointer-none">
+    <div id="loading" class="loading">
+        <div class="loading-bar">Loading</div>
+    </div>
+    <div id="pos-loading" class="container pos-loading" style="display: none;">
+        <div class="div-reprodutor-html">
+            <object type="text/html" data="" class="reprodutor-html hidden"></object>
+        </div>
+        <div class="previw-img hidden">
+            <img class="img" src="">
+        </div>
+        <div class="previw-video hidden">
+            <video class="video-background" autoplay="" disablepictureinpicture="" muted="" loop="" id="backgrounVideo" style="position: fixed;">
+                <source src="">
+            </video>
+            <video controls="false" loop class="video" id="video" style="position: absolute;">
+                <source src="" id="video-here">
+            </video>
+        </div>
+        <img class="state-player hidden" src="../Src/img/play.png">
+        <div class="card hidden">
+            <h1 class="aviso-tv hidden"></h1>
+        </div>
+        <div class="top-center-card"></div>
+        <!--<h2 style=" position: absolute; bottom: 0%; left: 1%; color: #858585; ">Versão de Teste <span id="version-app"></span></h2>-->
+        <h2 id="download-dependences" style=" position: absolute; bottom: 0%; right: 1%; color: #858585; "></h2>
+    </div>
+
+    <script src="../src/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../src/jquery/jquery.min.js"></script>
+    <script src="../src/jquery/jquery-ui.min.js"></script>
+    <script src="../src/jquery/jquery.mask.min.js"></script>
+    <script src="./js/BackImplemt.js"></script>
+    <script src="./js/player.js"></script>
+</body>
+</html>

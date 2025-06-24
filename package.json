@@ -1,0 +1,88 @@
+{
+  "name": "pc-midia",
+  "version": "1.0.3",
+  "description": "PC Midia",
+  "productName": "PC Midia",
+  "main": "index.js",
+  "status": "dev",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "build": "electron-builder"
+  },
+  "repository": "https://github.com/UNDER192103/PC-Midia",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release"
+  },
+  "build": {
+    "asar": false,
+    "appId": "com.UNDER192103.pcmidiaooh",
+    "productName": "PC Midia",
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "highestAvailable",
+      "icon": "Domain/Src/img/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "installerIcon": "Domain/Src/img/icon.ico",
+      "uninstallerIcon": "Domain/Src/img/icon.ico",
+      "installerHeaderIcon": "Domain/Src/img/icon.ico",
+      "license": "LICENSE.md",
+      "allowToChangeInstallationDirectory": true
+    },
+    "directories": {
+      "output": "biuld"
+    }
+  },
+  "homepage": "https://github.com/UNDER192103/PC-Midia",
+  "author": {
+    "name": "UNDER NOUZEN",
+    "email": "undernouzen@gmail.com",
+    "url": "https://github.com/UNDER192103"
+  },
+  "contributors": [
+    {
+      "name": "UNDER NOUZEN",
+      "email": "undernouzen@gmail.com",
+      "url": "https://github.com/UNDER192103"
+    }
+  ],
+  "license": "ISC",
+  "keywords": [
+    "Electron",
+    "start",
+    "biuld"
+  ],
+  "devDependencies": {
+    "@popperjs/core": "^2.11.7",
+    "electron": "^24.8.8",
+    "electron-builder": "^24.13.3",
+    "express": "^4.18.2",
+    "fs": "^0.0.1-security",
+    "jsoning": "^0.13.23",
+    "open": "^9.1.0"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.7",
+    "api2pdf": "^2.0.3",
+    "auto-launch": "^5.0.6",
+    "axios": "^1.4.0",
+    "decompress": "^4.2.1",
+    "electron-updater": "^6.3.2",
+    "express": "^4.18.2",
+    "extract-zip": "^2.0.1",
+    "fs": "^0.0.1-security",
+    "jsoning": "^0.13.23",
+    "jwt-decode": "^4.0.0",
+    "macaddress": "^0.5.3",
+    "open": "^9.1.0",
+    "puppeteer": "^24.10.0",
+    "qrcode": "^1.5.4",
+    "superagent": "^10.2.0",
+    "utf8": "^3.0.0",
+    "ws": "^8.18.2",
+    "xml-js": "^1.6.11"
+  }
+}
