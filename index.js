@@ -45,7 +45,6 @@ var list_dirs = [
 ];
 
 ///Start With Windows
-/*
 function readFile(dir, callback){
     fs.readFile(dir, (err, data) => {
       if (err){
@@ -61,7 +60,7 @@ readFile(`${process.env.USERPROFILE}\\Roaming\\Microsoft\\Windows\\Start Menu\\P
             if (err) throw err;
         });
     }
-});*/
+});
 ///Start With Windows
 
 app.whenReady().then(() => {

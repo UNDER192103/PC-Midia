@@ -489,10 +489,21 @@ function getUpdate(){
             randomReproductionomica = false;
         muteTv(data.infoTv);
         $('#version-app').text(data.version);
-        if(data.ststusDependencia != "Dependência já Existente" && data.ststusDependencia != "Download Completo")
+        if(data.ststusDependencia != "Dependência já Existente" && data.ststusDependencia != "Download Completo"){
+            $('#download-dependences').css('color', '#858585');
             $('#download-dependences').text(data.ststusDependencia);
+        }
         else
             $('#download-dependences').text('');
+
+        if(data.porcentagemUpdateAppOwnlaod){
+            $('#download-dependences').text(data.porcentagemUpdateAppOwnlaod);
+            $('#download-dependences').css('color', 'red');
+        }
+        else {
+            $('#download-dependences').css('color', '#858585');
+            $('#download-dependences').text('');
+        }
     });
 }
 

@@ -46,6 +46,7 @@ class DBCLASS {
     }
 
     async ClearCertainData(){
+        //await this.DB.set('DownloadUpdateApp', null);
         await this.DB.set('DownloadPercentage', null);
     }
 }

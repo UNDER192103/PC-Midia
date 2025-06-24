@@ -131,3 +131,7 @@ body {
     justify-items: center;
     align-items: center;
 }
+
+#download-dependences {
+    text-align: center;
+}

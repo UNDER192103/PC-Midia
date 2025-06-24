@@ -65,7 +65,9 @@ class TimeLineDownloader {
                     url: url.replaceAll('/usr/share/nginx/', 'https://'),
                     responseType: 'stream',
                     onDownloadProgress: async (progressEvent) => {
-                        console.log(progressEvent);
+                        if(progressEvent.bytes > 0 && timeOutDownlaod){
+                            clearTimeout(timeOutDownlaod);
+                        }
                         const total = progressEvent.total;
                         const current = progressEvent.loaded;
                         this._filePercentageDownlaod = Math.round((current / total) * 100);

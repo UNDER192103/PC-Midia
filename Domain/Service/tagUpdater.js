@@ -47,12 +47,18 @@ class TagUpdater {
     async DownloadFileByUrl(Block, nameBlock, url, dir){
         return new Promise(async (resolve, reject) => {
             try {
+                var timeOutDownlaod = setTimeout(() => {
+                    resolve(null);
+                }, 60000);
                 const writer = fs.createWriteStream(dir);
                 axios({
                     method: 'GET',
                     url: url.replaceAll('/usr/share/nginx/', 'https://'),
                     responseType: 'stream',
                     onDownloadProgress: async (progressEvent) => {
+                        if(progressEvent.bytes > 0 && timeOutDownlaod){
+                            clearTimeout(timeOutDownlaod);
+                        }
                         const total = progressEvent.total;
                         const current = progressEvent.loaded;
                         this._filePercentageDownlaod = Math.round((current / total) * 100);

