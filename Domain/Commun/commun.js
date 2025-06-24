@@ -116,9 +116,9 @@ function updateConfigJson(dirConfigJson, newDataConfigJson, callback){
 
 function ReiniciarWindows(){
     console.log('Reiniciando...');
-    /*exec('shutdown /r', (err, stdout, stderr) => {
+    exec('shutdown /r', (err, stdout, stderr) => {
     
-    });*/
+    });
 }
 
 async function CheckAllFolderAdr(dir){

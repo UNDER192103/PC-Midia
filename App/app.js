@@ -34,7 +34,6 @@ function GetQrCodeLinkTv(){
 
 async function createWindow () {
   setTimeout(async ()=>{
-    await DAO.DB.set('DownloadUpdateApp', "Atualização disponível, Por favor aguarde o processo de atualização ser concluído.");
     await DAO.ClearCertainData();
   }, 1000);
   window = new BrowserWindow({
@@ -236,7 +235,6 @@ autoUpdater.on('download-progress', async (info) => {
   else{
     await DAO.DB.set('DownloadUpdateApp', "Baixando Atualização, Por favor aguarde o processo ser concluído.");
   }
-  console.log(info);
 });
 
 autoUpdater.on("update-downloaded", async (event, releaseNotes, releaseName) => {
@@ -252,12 +250,10 @@ autoUpdater.on("update-downloaded", async (event, releaseNotes, releaseName) => 
 
 autoUpdater.on("update-not-available", async (info) => {
   await DAO.DB.set('DownloadUpdateApp', null);
-  console.log(info);
 });
 
 autoUpdater.on("error", async info => {
   await DAO.DB.set('DownloadUpdateApp', null);
-  console.log(info);
 });
 
 
