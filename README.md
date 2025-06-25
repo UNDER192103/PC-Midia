@@ -1,3 +1,5 @@
+<img src="https://sistema.pcmidiaooh.com.br/application/storage/system/logo.png" alt="Logo da Minha Empresa">
+
 Este aplicativo foi desenvoldio e publicado por Minas Force.
 
 O aplicativo foi desenvolvido exclusivamente para o site [pcmidiaooh.com.br](http://pcmidiaooh.com.br)
