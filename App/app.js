@@ -39,8 +39,6 @@ async function createWindow () {
   window = new BrowserWindow({
     width: 800,
     height: 600,
-    minWidth: 800,
-    minHeight: 600,
     icon: path.join(app.getAppPath(), "Domain", "Src", "img", "icon.ico"),
     webPreferences: {
       nodeIntegration: true,
