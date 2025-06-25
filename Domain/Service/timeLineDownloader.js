@@ -5,6 +5,7 @@ const DAO = require(path.join(app.getAppPath(), "Repository", "DB.js"));
 const EnumTv = require(path.join(app.getAppPath(), "Domain", "Models", "EnumTv.js"));
 const Commun = require(path.join(app.getAppPath(), "Domain", "Commun", "commun.js"));
 const axios = require('axios');
+const { Blob } = require('buffer');
 const fs = require('fs');
 
 
@@ -56,48 +57,40 @@ class TimeLineDownloader {
     async DownloadFileByUrl(Block, nameBlock, url, dir){
         return new Promise(async (resolve, reject) => {
             try {
-                var timeOutDownlaod = setTimeout(() => {
-                    resolve(null);
-                }, 60000);
-                const writer = fs.createWriteStream(dir);
-                axios({
-                    method: 'GET',
-                    url: url.replaceAll('/usr/share/nginx/', 'https://'),
-                    responseType: 'stream',
-                    onDownloadProgress: async (progressEvent) => {
-                        if(progressEvent.bytes > 0 && timeOutDownlaod){
-                            clearTimeout(timeOutDownlaod);
-                        }
-                        const total = progressEvent.total;
-                        const current = progressEvent.loaded;
-                        this._filePercentageDownlaod = Math.round((current / total) * 100);
-                        this.sendPercentageDownlaod(Block, nameBlock);
-                    },
-                })
-                .then(async (response)=>{
-                    try{
-                        response.data.pipe(writer);
-                        writer.on('finish', ()=>{
-                            this.CheckExisteValidFile(dir, async (isValidFile)=>{
-                                if(isValidFile === false){
-                                    resolve(true);
-                                }
-                                else{
-                                    reject(null);
-                                }
-                            });
-                        });
-                        writer.on('error', reject);
-                    }
-                    catch (error) {
-                        reject(error);
-                    }
-                })
-                .catch((error) => {
-                    reject(error);
+                const response = await axios.get(url, {
+                  responseType: 'arraybuffer',
+                  onDownloadProgress: (progressEvent) => {
+                    const total = progressEvent.total;
+                    const current = progressEvent.loaded;
+                    this._filePercentageDownlaod = Math.round((current / total) * 100);
+                    this.sendPercentageDownlaod(Block, nameBlock);
+                  },
                 });
+                if(response.data){
+                    await fs.promises.writeFile(dir, response.data);
+                    this.CheckExisteValidFile(dir, async (isValidFile)=>{
+                        if(isValidFile === false){
+                            resolve(true);
+                        }
+                        else{
+                            if(fs.existsSync(dir)){
+                                fs.unlinkSync(dir);
+                            }
+                            reject(null);
+                        }
+                    });
+                }
+                else{
+                    if(fs.existsSync(dir)){
+                        fs.unlinkSync(dir);
+                    }
+                    reject(null);
+                }
             } catch (error) {
-                reject(error);
+                if(fs.existsSync(dir)){
+                    fs.unlinkSync(dir);
+                }
+                reject(null);
             }
         });
     }
@@ -167,7 +160,7 @@ class TimeLineDownloader {
                             Callback();
                         })
                         .catch(error =>{
-                            console.log(error);
+                            //console.log(error);
                             this.RemoveFileAndPath(dirFile);
                             Callback();
                         });
@@ -227,7 +220,7 @@ class TimeLineDownloader {
                             Callback();
                         })
                         .catch(error =>{
-                            console.log(error);
+                            //console.log(error);
                             this.RemoveFileAndPath(dirFile);
                             Callback();
                         });
@@ -256,7 +249,7 @@ class TimeLineDownloader {
                     Callback(userAvatarDirFile);
                 })
                 .catch(error =>{
-                    console.log(error);
+                    //console.log(error);
                     Callback(null);
                 });
             }
@@ -275,7 +268,7 @@ class TimeLineDownloader {
                     Callback(postDirFile);
                 })
                 .catch(error =>{
-                    console.log(error);
+                    //console.log(error);
                     Callback(null);
                 });
             }
@@ -294,7 +287,7 @@ class TimeLineDownloader {
                         Callback(dirBlockLogo);
                     })
                     .catch(error =>{
-                        console.log(error);
+                        //console.log(error);
                         Callback(null);
                     });
                 }
@@ -428,7 +421,7 @@ class TimeLineDownloader {
                 });
             })
             .catch(error =>{
-                console.log(error);
+                //console.log(error);
                 Callback(null);
             });
         } catch (error) {
@@ -783,7 +776,7 @@ class TimeLineDownloader {
                     }
                 }
             } catch (error) {
-                console.log(error);
+                //console.log(error);
                 Resolve(true);
             }
         });

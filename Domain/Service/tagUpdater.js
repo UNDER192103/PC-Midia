@@ -45,53 +45,45 @@ class TagUpdater {
     }
 
     async DownloadFileByUrl(Block, nameBlock, url, dir){
-        return new Promise(async (resolve, reject) => {
-            try {
-                var timeOutDownlaod = setTimeout(() => {
-                    resolve(null);
-                }, 60000);
-                const writer = fs.createWriteStream(dir);
-                axios({
-                    method: 'GET',
-                    url: url.replaceAll('/usr/share/nginx/', 'https://'),
-                    responseType: 'stream',
-                    onDownloadProgress: async (progressEvent) => {
-                        if(progressEvent.bytes > 0 && timeOutDownlaod){
-                            clearTimeout(timeOutDownlaod);
-                        }
+            return new Promise(async (resolve, reject) => {
+                try {
+                    const response = await axios.get(url, {
+                      responseType: 'arraybuffer',
+                      onDownloadProgress: (progressEvent) => {
                         const total = progressEvent.total;
                         const current = progressEvent.loaded;
                         this._filePercentageDownlaod = Math.round((current / total) * 100);
-                        await this.sendPercentageDownlaod(Block, nameBlock);
-                    },
-                })
-                .then(async (response)=>{
-                    try{
-                        response.data.pipe(writer);
-                        writer.on('finish', ()=>{
-                            this.CheckExisteValidFile(dir, async (isValidFile)=>{
-                                if(isValidFile === false){
-                                    resolve(true);
+                        this.sendPercentageDownlaod(Block, nameBlock);
+                      },
+                    });
+                    if(response.data){
+                        await fs.promises.writeFile(dir, response.data);
+                        this.CheckExisteValidFile(dir, async (isValidFile)=>{
+                            if(isValidFile === false){
+                                resolve(true);
+                            }
+                            else{
+                                if(fs.existsSync(dir)){
+                                    fs.unlinkSync(dir);
                                 }
-                                else{
-                                    reject(null);
-                                }
-                            });
+                                reject(null);
+                            }
                         });
-                        writer.on('error', reject);
                     }
-                    catch (error) {
-                        reject(error);
+                    else{
+                        if(fs.existsSync(dir)){
+                            fs.unlinkSync(dir);
+                        }
+                        reject(null);
                     }
-                })
-                .catch((error) => {
-                    reject(error);
-                });
-            } catch (error) {
-                reject(error);
-            }
-        });
-    }
+                } catch (error) {
+                    if(fs.existsSync(dir)){
+                        fs.unlinkSync(dir);
+                    }
+                    reject(null);
+                }
+            });
+        }
 
     async CheckExisteValidFile(dirFile, Callback){
         if(fs.existsSync(dirFile)){
