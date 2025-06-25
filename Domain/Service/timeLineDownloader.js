@@ -581,7 +581,7 @@ class TimeLineDownloader {
                     url = dataBlock.diretorio.replaceAll("/usr/share/nginx/", "https://");
                     dirFile = path.join(dirBlock, url.split("/").pop());
                     this.CheckExisteValidFile(dirFile, async (isValidFile)=>{
-                        if(!isValidFile){
+                        if(isValidFile === true){
                             this.DownloadFileByUrl(Item, dataBlock.nomeBloco, url, dirFile).then(async ()=>{
                                 Callback({
                                     diretorio: dirFile,
@@ -595,7 +595,12 @@ class TimeLineDownloader {
                             });
                         }
                         else{
-                            Callback(null);
+                            Callback({
+                                diretorio: dirFile,
+                                blocoId: Block.bloco,
+                                duration: Block.duration,
+                                type: dataBlock.tipoBlock,
+                            });
                         }
                     });
                 break;
@@ -752,7 +757,7 @@ class TimeLineDownloader {
                         break;
 
                         case "VIDEO":
-                            this.DownloadBlockVideo(Block,()=>{
+                            this.DownloadBlockVideo(Block, ()=>{
                                 Resolve(true);
                             });
                         break;
@@ -810,10 +815,6 @@ class TimeLineDownloader {
                 this._callback = undefined;
                 await DAO.DB.set('DownloadPercentage', null);
                 //Commun.checkTimeLineFilesToDelete();
-                let isRemoveDataOldTimeline = await DAO.DB.get('RMOldDataOnFinishDownload');
-                if(isRemoveDataOldTimeline){
-                    console.log(isRemoveDataOldTimeline);
-                }
             }
         } catch (error) {
             if(this._posDI >= (this._itensToDownload.length*2)){
@@ -834,10 +835,6 @@ class TimeLineDownloader {
                 this._tId = undefined;
                 this._callback = undefined;
                 await DAO.DB.set('DownloadPercentage', null);
-                let isRemoveDataOldTimeline = await DAO.DB.get('RMOldDataOnFinishDownload');
-                if(isRemoveDataOldTimeline){
-                    console.log(isRemoveDataOldTimeline);
-                }
             }
             else{
                 this._posDI++;

@@ -366,8 +366,19 @@ class BlockUpdater {
                         this._posDII++;
                         this.sendPercentageDownlaod(Item);
                         if(data){
-                            if(isOnItem == true)
-                                blocks = data;
+                            if(isOnItem === true){
+                                if(Item.tags != null && Item.name_Tag != null){
+                                    if(!blocks[0]){
+                                        blocks = [data];
+                                    }
+                                    else{
+                                        blocks.push(data);
+                                    }
+                                }
+                                else{
+                                    blocks = data;
+                                }
+                            }
                             else
                                 blocks.push(data);
                         }

@@ -248,14 +248,8 @@ async function CheckBlocksUpdates(Data, Socket) {
                         let TimeLineUpdated = DataPlayerNow.map( ( item ) => {
                             let itemToUpdate = listToUpdate.find( itemToUpdate => itemToUpdate.id_item_complet == item.id_item_complet);
                             if(itemToUpdate){
-                                if(itemToUpdate.data.blocoId != null){
-                                    item = itemToUpdate;
-                                }
-                                else{
-                                    if(item.data.blocoId != null){
-
-                                    }
-                                    else{
+                                if(itemToUpdate.name_Tag != null){
+                                    if(item.data[0]){
                                         item.data = item.data.map(block => {
                                             let blockToUpdate = itemToUpdate.data.find(b => b.diretorio == block.diretorio);
                                             if(blockToUpdate){
@@ -264,6 +258,12 @@ async function CheckBlocksUpdates(Data, Socket) {
                                             return block;
                                         });
                                     }
+                                    else{
+                                        item.data = itemToUpdate.data;
+                                    }
+                                }
+                                else{
+                                    item.data = itemToUpdate.data;
                                 }
                             }
                             return item;
@@ -357,8 +357,20 @@ function ListFolders(directoryPath) {
   }
 }
 
+async function copiarTexto(texto) {
+    try {
+        const ncp = require('copy-paste');
+        ncp.copy(texto, function() {
+            console.log('Texto copiado com sucesso!');
+        });
+    } catch (error) {
+      console.error('Erro ao copiar texto:', error);
+    }
+}
+
 module.exports = {
     ListFolders,
+    copiarTexto,
     checkTimeLineFilesToDelete,
     DeleteOldTimeLine,
     DeleteAllFilesInstagram,

@@ -65,6 +65,11 @@ async function createWindow () {
         {
           label: `Versão Atual: ${app.getVersion()}`, type: 'normal', click: () => { }
         },
+        {
+          label: `Codigo: ${await DAO.GetTvCode()}`, type: 'normal', click: async () => {
+            Commun.copiarTexto(await DAO.GetTvCode());
+          }
+        },
         { type: 'separator' },
         {
           label: "Abrir Local Da Time Line", type: 'normal', click: () => {
