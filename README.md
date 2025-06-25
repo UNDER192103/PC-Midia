@@ -1,4 +1,4 @@
-<img src="https://sistema.pcmidiaooh.com.br/application/storage/system/logo.png" alt="Logo da Minha Empresa">
+<img src="https://sistema.pcmidiaooh.com.br/application/storage/system/logo.png" alt="">
 
 Este aplicativo foi desenvoldio e publicado por Minas Force.
 
