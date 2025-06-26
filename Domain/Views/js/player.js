@@ -32,7 +32,7 @@ $(document).ready(function () {
     checkDataPlayer();
     setInterval(()=>{
         getUpdate();
-    }, 700)
+    }, 500)
 });
 
 function getTempo(tempo){
@@ -454,26 +454,34 @@ function validPlayer(r) {
 
 function reloadScreen(r){
     if(r === true){
-        location.reload();
+        //location.reload();
     }else{
     }
 }
-function downloadRuning(dt){
-    if(dt.porcentagemDOwnlaod != null){
-        let text = dt.porcentagemDOwnlaod.text ? dt.porcentagemDOwnlaod.text : "Time Line Download";
-        let porcentagemBlock = parseInt((dt.porcentagemDOwnlaod.blocoListaNow*100)/dt.porcentagemDOwnlaod.blocoListaMax);
-        let porcentagem = parseInt((parseFloat(`${dt.porcentagemDOwnlaod.now}.${porcentagemBlock}`)*100)/dt.porcentagemDOwnlaod.max);
-        $(".top-center-card").css('display', 'flex').text(`${text}: ${porcentagem}%`);
-    }else if($(".top-center-card").text().length > 0){
-        $(".top-center-card").css('display', 'none');
+
+function downloadRuning(data){
+    if(data.porcentagemDOwnlaod != null){
+        let text = data.porcentagemDOwnlaod.text ? data.porcentagemDOwnlaod.text : "Time Line Download";
+        let porcentagemBlock = parseInt((data.porcentagemDOwnlaod.blocoListaNow*100)/data.porcentagemDOwnlaod.blocoListaMax);
+        let porcentagem = parseInt((parseFloat(`${data.porcentagemDOwnlaod.now}.${porcentagemBlock}`)*100)/data.porcentagemDOwnlaod.max);
+        if(data.porcentagemDOwnlaod.block && data.nameBLock != ""){
+            let DtoDownloadBlock = data.porcentagemDOwnlaod.block;
+            console.log(DtoDownloadBlock);
+            $(".top-card").css('display', 'flex').text(`${DtoDownloadBlock.text}: ${DtoDownloadBlock.percent}%`);
+        }
+        else{
+            $(".top-card").css('display', 'flex').text(`${text}: ${porcentagem}%`);
+        }
+    }else if($(".top-card").text().length > 0){
+        $(".top-card").css('display', 'none');
     }
 }
 
 function getUpdate(){
     BACKEND.Send('GetUpdate').then((data) => {
-        var response = data;
-        if(data.dataUpdateTag == "true")
+        if(data.dataUpdateTag == "true"){
             updateDataPlayerNoReload()
+        }
         tvCode = data.tvCode;
         if(data.update == true){
             reloadScreen(true)

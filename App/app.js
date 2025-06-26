@@ -64,7 +64,7 @@ async function createWindow () {
           label: `Versão Atual: ${app.getVersion()}`, type: 'normal', click: () => { }
         },
         {
-          label: `Codigo: ${await DAO.GetTvCode()}`, type: 'normal', click: async () => {
+          label: `Código: ${await DAO.GetTvCode()}`, type: 'normal', click: async () => {
             Commun.copiarTexto(await DAO.GetTvCode());
           }
         },
@@ -129,13 +129,13 @@ handleMessages('CreateLogRepoducaoTv', async (event, data)=>{
 handleMessages('GetDataPlayer', async (event, data)=>{
   return new Promise( async resolve => {
     let dt = null;
-    let dtNew = await DAO.DB.get('NewDataPlayer');
+    let dtNew = await DAO.TIMELINE.get('NewDataPlayer');
     if(dtNew == null || dtNew == "null" || dtNew == ""){
-        dt = await DAO.DB.get('DataPlayer');
+        dt = await DAO.TIMELINE.get('DataPlayer');
     }else{
         dt = dtNew;
-        await DAO.DB.set('DataPlayer', dtNew);
-        await DAO.DB.set('NewDataPlayer', null);
+        await DAO.TIMELINE.set('DataPlayer', dtNew);
+        await DAO.TIMELINE.set('NewDataPlayer', null);
     }
     if(dt == "" || dt == null || dt == "null")
         dt = "no_data";

@@ -456,8 +456,16 @@ class TagUpdater {
             max: 1,
             blocoListaNow: parseFloat(`${this._posDII}.${this._filePercentageDownlaod}`),
             blocoListaMax: Block.infoBloco != null && Block.infoBloco[0] != null ? Block.infoBloco.length : Block.tag != null && Block.tag.infobloco != null&& Block.tag.infobloco[0] != null ? Block.tag.infobloco.length : 1,
-            nameBLock: nameBlock
+            nameBLock: nameBlock,
+            block: {
+                percent: this._filePercentageDownlaod > 100 ? 100 : this._filePercentageDownlaod,
+                isUpdate: false,
+                text: "Update " + nameBlock,
+            }
         };
+        if(data.blocoListaNow > data.blocoListaMax){
+            data.blocoListaNow = data.blocoListaMax;
+        }
         await DAO.DB.set('DownloadPercentage', data);
     }
 

@@ -9,7 +9,11 @@ class DBCLASS {
     TvCode;
     DB_DIR = path.join(process.env.APPDATA, packageJson.productName, 'Data');
     DB_FILE = path.join(process.env.APPDATA, packageJson.productName, 'Data', 'DB', 'DB.json');
+    TIMELINE_FILE = path.join(process.env.APPDATA, packageJson.productName, 'Data', 'DB', 'TIMELINE.json');
+    TMP_FILE = path.join(process.env.APPDATA, packageJson.productName, 'Data', 'DB', 'TMP.json');
     DB = new Jsoning(this.DB_FILE);
+    TIMELINE = new Jsoning(this.TIMELINE_FILE);
+    TMP = new Jsoning(this.TMP_FILE);
     DIR_APP_APPDATA = path.join(process.env.APPDATA, packageJson.productName);
     LOGGER = new LOGGER();
 
@@ -48,6 +52,12 @@ class DBCLASS {
     async ClearCertainData(){
         await this.DB.set('DownloadUpdateApp', null);
         await this.DB.set('DownloadPercentage', null);
+
+        let dataPlayer = await this.DB.get('DataPlayer');
+        if(!await this.TIMELINE.get('DataPlayer') && dataPlayer != null) {
+            await this.TIMELINE.set('DataPlayer', dataPlayer);
+            await this.DB.set('DataPlayer', null);
+        }
     }
 }
 

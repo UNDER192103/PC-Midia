@@ -724,8 +724,19 @@ class TimeLineDownloader {
             max: this._itensToDownload.length,
             blocoListaNow: parseFloat(`${this._posDII}.${this._filePercentageDownlaod}`),
             blocoListaMax: Block.infoBloco != null && Block.infoBloco[0] != null ? Block.infoBloco.length : Block.tag != null && Block.tag.infobloco != null&& Block.tag.infobloco[0] != null ? Block.tag.infobloco.length : 1,
-            nameBLock: nameBlock
+            nameBLock: nameBlock,
+            block: {
+                percent: this._filePercentageDownlaod > 100 ? 100 : this._filePercentageDownlaod,
+                isUpdate: false,
+                text: "Download " + nameBlock,
+            }
         };
+        if(data.now > data.max){
+            data.now = data.max;
+        }
+        if(data.blocoListaNow > data.blocoListaMax){
+            data.blocoListaNow = data.blocoListaMax;
+        }
         let json = JSON.stringify({
             code: DAO.TvCode,
             tv_name: await this.getNameTv(),
@@ -798,8 +809,8 @@ class TimeLineDownloader {
                 });
             }
             else{
-                await DAO.DB.set('NewDataPlayer', this._itensDownloaded);
-                await DAO.DB.set('DataPlayer', this._itensDownloaded);
+                await DAO.TIMELINE.set('NewDataPlayer', this._itensDownloaded);
+                await DAO.TIMELINE.set('DataPlayer', this._itensDownloaded);
                 await DAO.DB.set('ReloadScreen', true);
                 this._Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: {response: "download_complete", idTimeline: this._tId, date: new Date().getTime()}, cmd: EnumTv.CALLBACK }))
                 this._Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await this.getNameTv(), data: { idTimeline: this._tId, type: true, version: new Date().getTime()}, cmd: EnumTv.PUBLISHED}));
@@ -819,8 +830,8 @@ class TimeLineDownloader {
         } catch (error) {
             if(this._posDI >= (this._itensToDownload.length*2)){
                 if(this._itensDownloaded.length > 0){
-                    await DAO.DB.set('NewDataPlayer', this._itensDownloaded);
-                    await DAO.DB.set('DataPlayer', this._itensDownloaded);
+                    await DAO.TIMELINE.set('NewDataPlayer', this._itensDownloaded);
+                    await DAO.TIMELINE.set('DataPlayer', this._itensDownloaded);
                 }
                 await DAO.DB.set('ReloadScreen', true);
                 this._Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: {response: "download_complete", idTimeline: this._tId, date: new Date().getTime()}, cmd: EnumTv.CALLBACK }))
@@ -844,24 +855,21 @@ class TimeLineDownloader {
         }
     }
 
-    async StartDownload(dto, callback){
+    async StartDownload(List, callback){
         this._callback = callback;
-        if(dto.data.length > 0 && dto.data[0]){
+        if(List && List[0]){
             this._dataTv = await DAO.DB.get('DataTv');
-            let oldDataTimeLine = await DAO.DB.get('DefaultDataTimeLine');
-            if(oldDataTimeLine && oldDataTimeLine.id != this._dataTv.timeline){
-                await DAO.DB.set('RMOldDataOnFinishDownload', oldDataTimeLine.id);
-            }
-            await DAO.DB.set('DefaultDataTimeLine', {
+            await DAO.TMP.set('DefaultDataTimeLine', {
                 id: this._dataTv.timeline,
-                data: dto.data,
+                data: List,
+                date: new Date().getTime()
             });
             this.isDownloading = true;
             this._tId = this._dataTv.timeline;
-            this._itensToDownload = dto.data;
+            this._itensToDownload = List;
             this._dirTimeLine = path.join(this._timelinesDir, this._tId);
             await Commun.CheckAllFolderAdr(this._dirTimeLine);
-            this.SendSocketLogs({response: 'TV_LOG', msg: `Download Time Line: ${dto.data[0].name}, para TV: ${DAO.TvCode}`, data: new Date().toLocaleString() });
+            this.SendSocketLogs({response: 'TV_LOG', msg: `Download Time Line: ${List[0].name}, para TV: ${DAO.TvCode}`, data: new Date().toLocaleString() });
             this._Socket.send(JSON.stringify({ code: DAO.TvCode, token_conection: null, tv_name: await this.getNameTv(), data: {response: "download_runing"}, cmd: EnumTv.CALLBACK }));
             this.ForDownloadItens();
         }

@@ -101,21 +101,22 @@ body {
     }
 }
 
-.top-center-card {
-    position: relative;
-    padding-inline-start: 1%;
-    padding-inline-end: 1%;
+.top-card {
+    display: none;
+    font-family: sans-serif;
+    padding: 0 1.25%;
     background-color: #76767682;
     color: white;
-    font-family: sans-serif;
-    margin-left: auto;
-    margin-right: auto;
-    height: 20px;
-    border-bottom-left-radius: 40px;
-    border-bottom-right-radius: 40px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    text-align: center;
+}
+
+.card-c-top{
+    position: fixed;
+    display: flex;
+    width: 100%;
     justify-content: center;
-    align-items: center;
-    display: none;
 }
 
 .card {

@@ -489,8 +489,19 @@ class BlockUpdater {
             max: Block.infoBloco.length,
             blocoListaNow: parseFloat(`${this._posDII}.${this._filePercentageDownlaod}`),
             blocoListaMax: this._maxPosDII,
-            nameBLock: nameBlock
+            nameBLock: nameBlock,
+            block: {
+                percent: this._filePercentageDownlaod > 100 ? 100 : this._filePercentageDownlaod,
+                isUpdate: true,
+                text: "Update " + nameBlock,
+            }
         };
+        if(data.now > data.max){
+            data.now = data.max;
+        }
+        if(data.blocoListaNow > data.blocoListaMax){
+            data.blocoListaNow = data.blocoListaMax;
+        }
         if(this.isDownloading)
             await DAO.DB.set('DownloadPercentage', data);
     }

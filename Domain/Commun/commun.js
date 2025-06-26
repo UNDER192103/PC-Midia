@@ -213,7 +213,7 @@ async function CheckBlocksUpdates(Data, Socket) {
                         if(DtoTagUpdate && DtoTagUpdate.tag && DtoTagUpdate.tag.infobloco.length > 0){
                             TagUpdater.StartDownload(DtoTagUpdate, async (DataTagToUpdate)=>{
                                 if(DataTagToUpdate != null){
-                                    let DataPlayerNow = await DAO.DB.get('DataPlayer');
+                                    let DataPlayerNow = await DAO.TIMELINE.get('DataPlayer');
                                     if(DataPlayerNow){
                                         let listItens = await DataPlayerNow.map( item => {
                                             if(item.id_item_complet == DataTagToUpdate.id_item_complet){
@@ -221,11 +221,11 @@ async function CheckBlocksUpdates(Data, Socket) {
                                             }
                                             return item;
                                         });
-                                        await DAO.DB.set('NewDataPlayer', listItens);
+                                        await DAO.TIMELINE.set('NewDataPlayer', listItens);
                                     }
                                     else{
-                                        await DAO.DB.set('NewDataPlayer', [DataTagToUpdate]);
-                                        await DAO.DB.set('DataPlayer', [DataTagToUpdate]);
+                                        await DAO.TIMELINE.set('NewDataPlayer', [DataTagToUpdate]);
+                                        await DAO.TIMELINE.set('DataPlayer', [DataTagToUpdate]);
                                     }
                                     await DAO.DB.set('ReloadScreen', true);
                                 }
@@ -244,7 +244,7 @@ async function CheckBlocksUpdates(Data, Socket) {
                     });
                     BlockUpdater.StartDownload(Data.dataUpdateBlock, async (listToUpdate) => {
                         await DAO.DB.set('DownloadPercentage', null);
-                        let DataPlayerNow = await DAO.DB.get('DataPlayer');
+                        let DataPlayerNow = await DAO.TIMELINE.get('DataPlayer');
                         let TimeLineUpdated = DataPlayerNow.map( ( item ) => {
                             let itemToUpdate = listToUpdate.find( itemToUpdate => itemToUpdate.id_item_complet == item.id_item_complet);
                             if(itemToUpdate){
@@ -268,7 +268,7 @@ async function CheckBlocksUpdates(Data, Socket) {
                             }
                             return item;
                         });
-                        await DAO.DB.set('NewDataPlayer', TimeLineUpdated);
+                        await DAO.TIMELINE.set('NewDataPlayer', TimeLineUpdated);
                         await DAO.DB.set('DownloadPercentage', null);
                         await DAO.DB.set('ReloadScreen', true);
                     })
@@ -282,9 +282,9 @@ async function CheckBlocksUpdates(Data, Socket) {
 
 async function checkTimeLineFilesToDelete(){
     return new Promise(async (resolve)=>{
-        let listToVerify = await DAO.DB.get('DataPlayer');
+        let listToVerify = await DAO.TIMELINE.get('DataPlayer');
         let dataTv = await DAO.DB.get('DataTv');
-        if(dataTv && dataTv.timeline && listToVerify.length > 0){
+        if(listToVerify && dataTv && dataTv.timeline && listToVerify.length > 0){
             let timelinesDir = path.join(app.getPath('userData'), 'Data', 'Storage', 'Timelines', dataTv.timeline);
             let listFoldersTimeLine = await ListFolders(timelinesDir);
             let filesTimeLine = [];
@@ -312,15 +312,18 @@ async function checkTimeLineFilesToDelete(){
 }
 
 async function DeleteOldTimeLine(){
-    let dataTv = await DAO.DB.get('DataTv');
-    if(dataTv && dataTv.timeline){
-        let timelinesDir = path.join(app.getPath('userData'), 'Data', 'Storage', 'Timelines');
-        let listFoldersTimeLine = await ListFolders(timelinesDir);
-        listFoldersTimeLine.forEach(dirTimeLine => {
-            if(dirTimeLine != path.join(timelinesDir, dataTv.timeline)){
-                DeleteDir(dirTimeLine);
-            }
-        })
+    let dataPlayer = await DAO.TIMELINE.get('DataPlayer');
+    if(dataPlayer && dataPlayer.length > 0){
+        let dataTv = await DAO.DB.get('DataTv');
+        if(dataTv && dataTv.timeline){
+            let timelinesDir = path.join(app.getPath('userData'), 'Data', 'Storage', 'Timelines');
+            let listFoldersTimeLine = await ListFolders(timelinesDir);
+            listFoldersTimeLine.forEach(dirTimeLine => {
+                if(dirTimeLine != path.join(timelinesDir, dataTv.timeline)){
+                    DeleteDir(dirTimeLine);
+                }
+            })
+        }
     }
 }
 
@@ -368,6 +371,13 @@ async function copiarTexto(texto) {
     }
 }
 
+function isDateMoreThanOneDayFromNow(timestamp) {
+    const now = new Date().getTime();
+    const oneDayInMs = 24 * 60 * 60 * 1000;
+    
+    return timestamp > (now + oneDayInMs);
+}
+
 module.exports = {
     ListFolders,
     copiarTexto,
@@ -384,4 +394,5 @@ module.exports = {
     ReadDir,
     FormatDataInstaloader,
     CheckBlocksUpdates,
+    isDateMoreThanOneDayFromNow,
 }

@@ -41,6 +41,8 @@ const check_folders_data_DB = async (list, callback, count = 0) => {
 
 var list_dirs = [
     path.join(app.getPath('userData'), 'Data', 'DB', 'DB.json'),
+    path.join(app.getPath('userData'), 'Data', 'DB', 'TIMELINE.json'),
+    path.join(app.getPath('userData'), 'Data', 'DB', 'TMP.json'),
     path.join(app.getPath('userData'), 'Data', 'DB', 'LOGS.json'),
 ];
 
