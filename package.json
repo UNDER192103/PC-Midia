@@ -4,7 +4,7 @@
   "description": "PC Midia",
   "productName": "PC Midia",
   "main": "index.js",
-  "status": "dev",
+  "status": "release",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "electron .",
