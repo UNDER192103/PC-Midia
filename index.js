@@ -66,9 +66,16 @@ readFile(`${process.env.USERPROFILE}\\Roaming\\Microsoft\\Windows\\Start Menu\\P
 ///Start With Windows
 
 app.whenReady().then(() => {
-    check_folders_data_UN(() => {
-        check_folders_data_DB(list_dirs, () => {
-            require(path.join(app.getAppPath(), "App", "app.js"));
+    const isRunning = app.requestSingleInstanceLock()
+    if (isRunning) {
+        check_folders_data_UN(() => {
+            check_folders_data_DB(list_dirs, () => {
+                require(path.join(app.getAppPath(), "App", "app.js"));
+            });
         });
-    });
+    }
+    else {
+        app.quit();
+        process.exit();
+    }
 });

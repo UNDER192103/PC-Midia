@@ -1,6 +1,6 @@
 {
   "name": "pc-midia",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "PC Midia",
   "productName": "PC Midia",
   "main": "index.js",
@@ -30,10 +30,10 @@
       "uninstallerIcon": "Domain/Src/img/icon.ico",
       "installerHeaderIcon": "Domain/Src/img/icon.ico",
       "license": "LICENSE.md",
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": false
     },
     "directories": {
-      "output": "biuld"
+      "output": "build"
     }
   },
   "homepage": "https://github.com/UNDER192103/PC-Midia",
