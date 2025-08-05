@@ -1,0 +1,135 @@
+body {
+    margin: 0px;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.reprodutor-html {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.cusor-pointer-none {cursor: none;}
+
+.content{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.container {
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: black;
+}
+
+.background-screen{
+    width: 100%;
+    height: 100%;
+}
+
+.hidden{
+    display: none !important;
+}
+
+.previw-img {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+.img {
+    width: 100%;
+    height: 100%;
+}
+
+.previw-video {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+.video {
+    width: 100%!important;
+    height: 100%!important;
+    background: transparent;
+}
+.video-background {
+    -webkit-filter: blur(8px);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+}
+.state-player {
+    width: 25vh;
+    margin: auto;
+}
+.aviso-tv {
+    position: absolute;
+    color: black;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 50px;
+    display: flex;
+    width: 100%;
+    top: auto;
+    bottom: auto;
+    height: auto;
+    left: 0%;
+    text-align: center;
+}
+@media only screen and (max-height: 650px) {
+    .aviso-tv {
+        position: absolute;
+        color: black;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 2.5em;
+        display: flex;
+        width: 100%;
+        top: auto;
+        bottom: auto;
+        height: auto;
+        left: 0%;
+        text-align: center;
+    }
+}
+
+.top-card {
+    display: none;
+    font-family: sans-serif;
+    padding: 0 1.25%;
+    background-color: #76767682;
+    color: white;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    text-align: center;
+}
+
+.card-c-top{
+    position: fixed;
+    display: flex;
+    width: 100%;
+    justify-content: center;
+}
+
+.card {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 22px;
+    left: 15%;
+    top: 33%;
+    width: 70%;
+    height: 34%;
+    box-shadow: 1px 1px 9px 3px #eee;
+    display: flex;
+    justify-items: center;
+    align-items: center;
+}
+
+#download-dependences {
+    text-align: center;
+}

@@ -1,0 +1,29 @@
+{
+    "URL_SITE" : "https://sistema.pcmidiaooh.com.br",
+    "URL_API" : "https://sistema.pcmidiaooh.com.br/?ng=api/",
+    "URL_WEBSOCKET" : "wss://sistema.pcmidiaooh.com.br:8080",
+    "URL_CACHE_DEPENDENCE" :"",
+    "URL_CHROMIUM_DOWNLOAD": "https://sistema.pcmidiaooh.com.br/application/storage/dependencies-app/local-chromium.zip",
+    "KEY_API":"7nxi8ud7qcjc0to3pxlovo3l7hdgpusd3h1065mv",
+    "USER_NAME_INSTAGRAM" : "",
+    "USER_PASSWORD_INSTAGRAM" : "",
+    "NAME_FOLDER_DATA" : "data",
+    "NAME_FOLDER_LOGS" : "logs",
+    "SYSTEM" : "WINDOWS",
+    "COOKIE_API_1": "mid=ZOMBfQALAAGmZDOWMr4zomBZzxf_; ig_did=407FB581-5FF0-431D-88BB-ACC7337F80CB; datr=0AHjZE3qp1PeDvww1wUsOF9s; ds_user_id=49823149244; sessionid=49823149244%3A7dPXoBdsWExfzu%3A11%3AAYeWTZNSZXGM-1Hnjogpm04SNbcftqO-uPe9ERKSCQ; csrftoken=dDwdVaBkTXXCOVzNh7UpyoHOTcxLH7EM; shbid='13041\\05449823149244\\0541725979091:01f758d851abbc552d8f4f5291caa99c3ed56fcb066bb482d70b1e5ea3bf5e545ab3455f'; shbts='1694443091\\05449823149244\\0541725979091:01f7da37636080b5dbea5477df1f9a18bec179f7027dfa7ec9db579b229971ead395a486'; rur='EAG\\05449823149244\\0541725995139:01f7399c25f6dd920d13b9ef23dd6f3fb7384d5853d220cc9a99b6a194c5b5be79ace9cb'",
+    "VERSION_TYPE": "release",
+    "LIST_USERES_NOTIFY": [
+        {
+            "name":"Luis Pedro",
+            "number": "553387460278"
+        },
+        {
+            "name":"Marcos Rafael",
+            "number": "553189715963"
+        },
+        {
+            "name":"Pedro Costa",
+            "number": "553888161296"
+        }
+    ]
+}
