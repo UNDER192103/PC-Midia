@@ -4,7 +4,7 @@
     "URL_WEBSOCKET" : "wss://sistema.pcmidiaooh.com.br:8080",
     "URL_CACHE_DEPENDENCE" :"",
     "URL_CHROMIUM_DOWNLOAD": "https://sistema.pcmidiaooh.com.br/application/storage/dependencies-app/local-chromium.zip",
-    "KEY_API":"7nxi8ud7qcjc0to3pxlovo3l7hdgpusd3h1065mv",
+    "KEY_API":"key_api_value",
     "USER_NAME_INSTAGRAM" : "",
     "USER_PASSWORD_INSTAGRAM" : "",
     "NAME_FOLDER_DATA" : "data",
@@ -14,15 +14,7 @@
     "LIST_USERES_NOTIFY": [
         {
             "name":"Luis Pedro",
-            "number": "553387460278"
-        },
-        {
-            "name":"Marcos Rafael",
-            "number": "553189715963"
-        },
-        {
-            "name":"Pedro Costa",
-            "number": "553888161296"
+            "number": "phone_number_1"
         }
     ]
 }
