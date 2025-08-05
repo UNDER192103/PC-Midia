@@ -14,7 +14,7 @@ var dataPlayer = null, validDataPlayer = null, tvCode = null, alertOpen = false,
 function checkDataPlayer(verify = false){
     BACKEND.Send('GetDataPlayer').then((data) => {
         if(data != "no_data"){
-            if(verify === true){
+            if(verify === true && dataPlayer != null){
                 dataPlayer = data.map((item) => {
                     if(!item.oldData) item.oldData = new Array();
                     let actul_item = dataPlayer.find(f => f.id_item_complet === item.id_item_complet);
