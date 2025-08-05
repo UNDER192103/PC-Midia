@@ -5,7 +5,7 @@ var macaddress = require('macaddress');
 
 class DBCLASS {
     Package = require('../package.json');
-    Config = require('./config.json');
+    Config = require('../config.json');
     TvCode;
     DB_DIR = path.join(process.env.APPDATA, packageJson.productName, 'Data');
     DB_FILE = path.join(process.env.APPDATA, packageJson.productName, 'Data', 'DB', 'DB.json');
