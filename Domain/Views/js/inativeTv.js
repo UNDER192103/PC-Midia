@@ -1,5 +1,5 @@
 ipcRenderer.on('DataLinkTv', (events, data) => {
-    console.log(data);
+    //console.log(data);
     $("#loading").fadeOut('slow');
     $("#pos-loading").fadeIn();
     if($("#text").text() == ""){

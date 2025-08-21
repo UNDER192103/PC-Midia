@@ -1,11 +1,11 @@
 
 const { app } = require('electron');
 const path = require('path');
+const Api = require(path.join(app.getAppPath(), "Repository", "api.js"));
 const DAO = require(path.join(app.getAppPath(), "Repository", "DB.js"));
 const EnumTv = require(path.join(app.getAppPath(), "Domain", "Models", "EnumTv.js"));
 const Commun = require(path.join(app.getAppPath(), "Domain", "Commun", "commun.js"));
 const axios = require('axios');
-const { Blob } = require('buffer');
 const fs = require('fs');
 
 
@@ -30,7 +30,19 @@ class TimeLineDownloader {
     SetSocket(Socket){ this._Socket = Socket; }
 
     async SendSocketLogs(data){
-        let infoTv = this._dataTv;
+        try {
+            Api.Send(EnumTv.TV_LOG, {
+                code: await DAO.GetTvCode(),
+                json: JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: data, cmd: EnumTv.TV_LOG }),
+            }).then(async (response)=>{
+
+            })
+            .catch((error)=>{
+                console.log(error.response);
+            });
+        } catch (error) {
+            console.log(error);
+        }
         this._Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: data, cmd: EnumTv.TV_LOG }));
     }
 
@@ -57,7 +69,7 @@ class TimeLineDownloader {
     async DownloadFileByUrl(Block, nameBlock, url, dir){
         return new Promise(async (resolve, reject) => {
             try {
-                const response = await axios.get(url, {
+                axios.get(url, {
                   responseType: 'arraybuffer',
                   onDownloadProgress: (progressEvent) => {
                     const total = progressEvent.total;
@@ -65,27 +77,36 @@ class TimeLineDownloader {
                     this._filePercentageDownlaod = Math.round((current / total) * 100);
                     this.sendPercentageDownlaod(Block, nameBlock);
                   },
-                });
-                if(response.data){
-                    await fs.promises.writeFile(dir, response.data);
-                    this.CheckExisteValidFile(dir, async (isValidFile)=>{
-                        if(isValidFile === false){
-                            resolve(true);
-                        }
-                        else{
-                            if(fs.existsSync(dir)){
-                                fs.unlinkSync(dir);
+                }).then(async response => {
+                    //console.log(response.status);
+                    if(response.data){
+                        await fs.promises.writeFile(dir, response.data);
+                        this.CheckExisteValidFile(dir, async (isValidFile)=>{
+                            if(isValidFile === false){
+                                resolve(true);
                             }
-                            reject(null);
-                        }
-                    });
-                }
-                else{
-                    if(fs.existsSync(dir)){
-                        fs.unlinkSync(dir);
+                            else{
+                                if(fs.existsSync(dir)){
+                                    fs.unlinkSync(dir);
+                                }
+                                reject(null);
+                            }
+                        });
                     }
+                    else{
+                        if(fs.existsSync(dir)){
+                            fs.unlinkSync(dir);
+                        }
+                        reject(null);
+                    }
+                    
+                })
+                .catch(async error => {
+                    /*if(error && error.status){
+                        console.log(error.status);
+                    }*/
                     reject(null);
-                }
+                });
             } catch (error) {
                 if(fs.existsSync(dir)){
                     fs.unlinkSync(dir);
@@ -291,8 +312,8 @@ class TimeLineDownloader {
     }
 
     async DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, Callback){
-        let postDirFile = path.join(dirBlock, `user-post-${this._posDII}.${block.video_url != null ? "mp4" : "png"}`);
-        let urlFile = block.video_url != null ? block.video_url : block.url;
+        let postDirFile = path.join(dirBlock, `user-post-${this._posDII}.${block.video_url != null && block.video_url != '' ? "mp4" : "png"}`);
+        let urlFile = block.video_url != null && block.video_url != '' ? block.video_url : block.url;
         this.CheckExisteValidFile(postDirFile, async (isValidFile)=>{
             if(isValidFile === true){
                 this.DownloadFileByUrl(Item, dataBlock.nomeBloco, urlFile, postDirFile).then(async ()=>{
@@ -345,36 +366,39 @@ class TimeLineDownloader {
 
     async DownloadFilesInstagram(Item, block, dataBlock, dirBlock, Callback){
         this.DownlaodUserInstagramAvatar(Item, block, dataBlock, dirBlock, (userAvatarDirFile)=>{
-            if(userAvatarDirFile){
-                this.DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, (userPostDirFile)=>{
-                    if(userPostDirFile){
-                        this.DownloadBlockLogo(Item, dataBlock, dirBlock, (dirBlockLogo)=>{
-                            if(dirBlockLogo){
-                                let UrlHtml = `${DAO.Config.URL_SITE}/?ng=block/image-generator/${dataBlock.tipoBlock.toLowerCase()}/${block.bloco}/2/${this._posDII}`;	
-                                this.GetPageByUrl(UrlHtml).then(async (Html) => {
-                                    if(Html != null){
-                                        Html = Html.replaceAll("url_file_video", userPostDirFile);
-                                        Html = Html.replaceAll("url_file_main", userPostDirFile);
-                                        Html = Html.replace("url_file_avatar", userAvatarDirFile);
-                                        if(dirBlockLogo != true) Html = Html.replace("url_file_logo", dirBlockLogo);
-                                        let dirFileHtml = path.join(dirBlock, `user-post-${this._posDII}.html`);
-                                        this.CreateFileByData(dirFileHtml, Html).then(async (isCreated)=>{
-                                            if(isCreated){
-                                                this.CheckExisteValidFile(dirFileHtml, (isInvalidFile) => {
-                                                    if(isInvalidFile === false){
-                                                        Callback(
-                                                            {
-                                                                dir: dirFileHtml,
-                                                                id: block.bloco,
-                                                                duration: block.duration,
-                                                                type: dataBlock.tipoBlock
-                                                            }
-                                                        );
+            this.DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, (userPostDirFile)=>{
+                if(userPostDirFile){
+                    this.DownloadBlockLogo(Item, dataBlock, dirBlock, (dirBlockLogo)=>{
+                        let UrlHtml = `${DAO.Config.URL_SITE}/?ng=block/image-generator/${dataBlock.tipoBlock.toLowerCase()}/${block.bloco}/2/${this._posDII}`;	
+                        this.GetPageByUrl(UrlHtml).then(async (Html) => {
+                            if(Html != null){
+                                Html = Html.replaceAll("url_file_video", userPostDirFile);
+                                Html = Html.replaceAll("url_file_main", userPostDirFile);
+                                if(userAvatarDirFile){
+                                    Html = Html.replace("url_file_avatar", userAvatarDirFile);
+                                }
+                                else{
+                                    Html = Html.replace("url_file_avatar", '');
+                                }
+                                if(dirBlockLogo){
+                                    Html = Html.replace("url_file_logo", dirBlockLogo);
+                                }
+                                else{
+                                    Html = Html.replace("url_file_logo", '');
+                                }
+                                let dirFileHtml = path.join(dirBlock, `user-post-${this._posDII}.html`);
+                                this.CreateFileByData(dirFileHtml, Html).then(async (isCreated)=>{
+                                    if(isCreated){
+                                        this.CheckExisteValidFile(dirFileHtml, (isInvalidFile) => {
+                                            if(isInvalidFile === false){
+                                                Callback(
+                                                    {
+                                                        dir: dirFileHtml,
+                                                        id: block.bloco,
+                                                        duration: block.duration,
+                                                        type: dataBlock.tipoBlock
                                                     }
-                                                    else{
-                                                        Callback(null);
-                                                    }
-                                                });
+                                                );
                                             }
                                             else{
                                                 Callback(null);
@@ -390,15 +414,12 @@ class TimeLineDownloader {
                                 Callback(null);
                             }
                         });
-                    }
-                    else{
-                        Callback(null);
-                    }
-                });
-            }
-            else{
-                Callback(null);
-            }
+                    });
+                }
+                else{
+                    Callback(null);
+                }
+            });
         });
     }
 
@@ -481,35 +502,32 @@ class TimeLineDownloader {
                         this.DownloadBlockInstagram(Item, Callback, blocks); 
                     }
                     else{
-                       this._posDII++;
-                        //this.RemoveFileAndPath(dirFile);
+                        this._posDII++;
                         this.DownloadBlockInstagram(Item, Callback, blocks); 
                     }
                 });
             }
             else{
-                if(blocks.length > 0){
-                    this._itensDownloaded.push(
-                        {
-                            id_item_complet: Item.id_item_complet,
-                            pos: 0,
-                            blocoId: Item.blocos,
-                            noArray: false,
-                            name_Tag: Item.name_Tag,
-                            random_itens: Item.random_itens,
-                            tempo: Item.tempo,
-                            tempo_instagram: Item.tempo_instagram,
-                            tempo_rss: Item.tempo_rss,
-                            tempo_img: Item.tempo_img,
-                            tempo_video: Item.tempo_video,
-                            ismultitempo: Item.ismultitempo,
-                            type: Item.type,
-                            random: false,
-                            data: blocks
-                        }
-                    );
-                    Callback();
-                }
+                this._itensDownloaded.push(
+                    {
+                        id_item_complet: Item.id_item_complet,
+                        pos: 0,
+                        blocoId: Item.blocos,
+                        noArray: false,
+                        name_Tag: Item.name_Tag,
+                        random_itens: Item.random_itens,
+                        tempo: Item.tempo,
+                        tempo_instagram: Item.tempo_instagram,
+                        tempo_rss: Item.tempo_rss,
+                        tempo_img: Item.tempo_img,
+                        tempo_video: Item.tempo_video,
+                        ismultitempo: Item.ismultitempo,
+                        type: Item.type,
+                        random: false,
+                        data: blocks
+                    }
+                );
+                Callback();
             }
         } catch (error) {
             //console.log(error);
@@ -548,28 +566,26 @@ class TimeLineDownloader {
                 });
             }
             else{
-                if(blocks.length > 0){
-                    this._itensDownloaded.push(
-                        {
-                            id_item_complet: Item.id_item_complet,
-                            pos: 0,
-                            blocoId: Item.blocos,
-                            noArray: false,
-                            name_Tag: Item.name_Tag,
-                            random_itens: Item.random_itens,
-                            tempo: Item.tempo,
-                            tempo_instagram: Item.tempo_instagram,
-                            tempo_rss: Item.tempo_rss,
-                            tempo_img: Item.tempo_img,
-                            tempo_video: Item.tempo_video,
-                            ismultitempo: Item.ismultitempo,
-                            type: Item.type,
-                            random: false,
-                            data: blocks
-                        }
-                    );
-                    Callback();
-                }
+                this._itensDownloaded.push(
+                    {
+                        id_item_complet: Item.id_item_complet,
+                        pos: 0,
+                        blocoId: Item.blocos,
+                        noArray: false,
+                        name_Tag: Item.name_Tag,
+                        random_itens: Item.random_itens,
+                        tempo: Item.tempo,
+                        tempo_instagram: Item.tempo_instagram,
+                        tempo_rss: Item.tempo_rss,
+                        tempo_img: Item.tempo_img,
+                        tempo_video: Item.tempo_video,
+                        ismultitempo: Item.ismultitempo,
+                        type: Item.type,
+                        random: false,
+                        data: blocks
+                    }
+                );
+                Callback();
             }
         } catch (error) {
             //console.log(error);
@@ -877,6 +893,9 @@ class TimeLineDownloader {
                 await DAO.DB.set('ReloadScreen', true);
                 this._Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: {response: "download_complete", idTimeline: this._tId, date: new Date().getTime()}, cmd: EnumTv.CALLBACK }))
                 this._Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await this.getNameTv(), data: { idTimeline: this._tId, type: true, version: new Date().getTime()}, cmd: EnumTv.PUBLISHED}));
+                Api.Send(EnumTv.PUBLISHED, {code: DAO.TvCode, version: new Date().getTime()}).then((res)=>{
+                    //console.log(res.data);
+                }).catch(console.log);
                 this._callback({timeline: this._tId, finished: true});
                 this._dirTimeLine = undefined;
                 this._dataTv = undefined;
@@ -888,7 +907,6 @@ class TimeLineDownloader {
                 this._tId = undefined;
                 this._callback = undefined;
                 await DAO.DB.set('DownloadPercentage', null);
-                //Commun.checkTimeLineFilesToDelete();
             }
         } catch (error) {
             if(this._posDI >= (this._itensToDownload.length*2)){

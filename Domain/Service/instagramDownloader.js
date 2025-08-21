@@ -2,6 +2,7 @@
 const { app } = require('electron');
 const path = require('path');
 const { exec } = require('child_process');
+const Api = require(path.join(app.getAppPath(), "Repository", "api.js"));
 const DAO = require(path.join(app.getAppPath(), "Repository", "DB.js"));
 const EnumTv = require(path.join(app.getAppPath(), "Domain", "Models", "EnumTv.js"));
 const Commun = require(path.join(app.getAppPath(), "Domain", "Commun", "commun.js"));
@@ -29,7 +30,19 @@ class InstagramDownloader {
     SetSocket(Socket){ this._Socket = Socket; }
 
     async SendSocketLogs(data){
-        let infoTv = this._dataTv;
+        try {
+            Api.Send(EnumTv.TV_LOG, {
+                code: await DAO.GetTvCode(),
+                json: JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: data, cmd: EnumTv.TV_LOG }),
+            }).then(async (response)=>{
+
+            })
+            .catch((error)=>{
+                console.log(error.response);
+            });
+        } catch (error) {
+            console.log(error);
+        }
         this._Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: await this.getNameTv(), data: data, cmd: EnumTv.TV_LOG }));
     }
 
@@ -176,7 +189,7 @@ class InstagramDownloader {
                         if(Posts != null && Posts.length > 0){
                             if(Posts.length < blockInfo.postsInsta){
                                 blockInfo.postsInsta = Posts.length;
-                                console.log("Menos Posts Que precisa");
+                                //console.log("Menos Posts Que precisa");
                             }
                             let list_posts = [];
                             for (let index = 0; index < blockInfo.postsInsta; index++) {

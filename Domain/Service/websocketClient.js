@@ -1,42 +1,44 @@
 const { app } = require('electron');
 const path = require('path');
+const WebSocket = require('ws');
+const Api = require(path.join(app.getAppPath(), "Repository", "api.js"));
 const DAO = require(path.join(app.getAppPath(), "Repository", "DB.js"));
 const EnumTv = require(path.join(app.getAppPath(), "Domain", "Models", "EnumTv.js"));
 const Commun = require(path.join(app.getAppPath(), "Domain", "Commun", "commun.js"));
 const TimeLineDownloaderService = require('./timeLineDownloader.js');
 const instagramDownloaderService = require('./instagramDownloader.js');
-const WebSocket = require('ws');
 const TimeLineDownload = new TimeLineDownloaderService();
 const instagramDownloader = new instagramDownloaderService();
-var Socket = null, _callback = null, cmd_to_server = null, IsFirstStart = true;
+var Socket = null, IsFirstGetInfo = true, _callback = null, cmd_to_server = null, IsFirstStart = true, heartbeatInterval = null;
 
 async function StartSocket() {
+    if(IsFirstGetInfo){
+        GetInfoTv();
+        IsFirstGetInfo = false;
+    }
     Socket = new WebSocket(`${DAO.Config.URL_WEBSOCKET}?${await DAO.GetTvCode()}`);
+    DAO.DB.set('StatusWebSocket', Socket.readyState);
     TimeLineDownload.SetSocket(Socket);
     instagramDownloader.SetSocket(Socket);
-    DAO.DB.set('StatusWebSocket', Socket.readyState);
 
-    Socket.on('close', ()=>{
+    Socket.on('close', (data)=>{
+        console.log('Close: ',data);
+        clearInterval(heartbeatInterval);
         startWs10Segundos();
     });
-
+    
     Socket.on('message', (buffer)=>{
         let string = buffer.toString();
         try {
-            let dtoObject = JSON.parse(string);
-            if(cmd_to_server != null && dtoObject.cmd == null){
-                cmd_to_server['data'] = dtoObject;
-                commands(cmd_to_server);
-                cmd_to_server = null;
-            }
-            else
-              commands(dtoObject);
+            commands(JSON.parse(string));
         } catch (error) {
             console.log(error);
         }
     });
 
-    Socket.on('error', ()=>{
+    Socket.on('error', (data)=>{
+        console.log('Error: ',data);
+        clearInterval(heartbeatInterval);
         startWs10Segundos();
     });
 
@@ -48,42 +50,62 @@ async function StartSocket() {
             IsFirstStart = false;
             CheckTimeLineDownloaded();
         }
+        clearInterval(heartbeatInterval);
+        heartbeatInterval = setInterval(() => {
+            if (Socket && Socket.readyState === WebSocket.OPEN) {
+                Socket.ping(() => {});
+            }
+        }, 30000);
     });
-    LoopGetInfoTv();
 }
 
-var timeOutLoopGetInfoTv = null;
-function LoopGetInfoTv(){
-    clearTimeout(timeOutLoopGetInfoTv);
-    timeOutLoopGetInfoTv = setTimeout(async ()=>{
-        GetInfoTv(()=>{
-            setTimeout(()=>{
-                LoopGetInfoTv();
-            }, randomBetween(30000, 300000))
-        });
-    }, randomBetween(60000, 600000));
-}
 async function GetInfoTv(callback = null){
     try {
-        if(Socket && Socket.readyState === Socket.OPEN){
-            let timeDownloadedTimeLine = await DAO.DB.get('timeDownloadedTimeLine');
-            cmd_to_server = {
-                code: DAO.TvCode,
-                token_conection: null,
-                data: {
-                    app_info: JSON.stringify({
-                        status: DAO.Package.status,
-                        name: DAO.Package.productName,
-                        version: DAO.Package.version,
-                    }),
-                    date: `${new Date().toLocaleTimeString()} ${new Date().toLocaleDateString()}`,
-                    app_update: false
-                },
-                version: timeDownloadedTimeLine ? timeDownloadedTimeLine : "",
-                cmd: EnumTv.INFO_TV
-            };
-            await Socket.send(JSON.stringify(cmd_to_server));
-        }
+        let timeDownloadedTimeLine = await DAO.DB.get('timeDownloadedTimeLine');
+        Api.Send(EnumTv.INFO_TV, {
+            code: await DAO.GetTvCode(),
+            json: JSON.stringify({
+                app_info: JSON.stringify({status: DAO.Package.status,name: DAO.Package.productName,version: DAO.Package.version})
+            }),
+            version: timeDownloadedTimeLine ? timeDownloadedTimeLine : "",
+        }).then(async (response)=>{
+            try {
+                var Data = response.data;
+                if(Data.success === true){
+                    if(Data.result != null && Data.result.id && Data.result.code){
+                        let DTO = Data.result;
+                        let isLinked = await DAO.DB.get('IsLinkedTv');
+                        await DAO.DB.set('IsLinkedTv', true);
+                        await DAO.DB.set('DataTv', DTO);
+                        await DAO.DB.set('PlayerState', DTO.play_pause);
+                        await DAO.DB.set('RandomReproduction', DTO.reproducaoRand);
+                        await DAO.DB.set('IsConnected', true);
+                        if(isLinked != true){
+                            receiver({code: "update_screen"});
+                        }
+                        if(!TimeLineDownload.isDownloading && (Socket && Socket.readyState === Socket.OPEN)){
+                            Commun.CheckBlocksUpdates(DTO, Socket);
+                        }
+                        receiver({code: "data_tv", data: DTO});
+                        checkTvToMute();
+                    }
+                    else{
+                        await DAO.DB.set('is_connection', 'no_conected');
+                        await DAO.DB.remove('DataTv');
+                        await DAO.DB.set('link_tv', "no_link");
+                        await DAO.DB.set('IsLinkedTv', false);
+                        await DAO.DB.set("reloadApp", true)
+                        receiver({code: "update_screen"});
+                        //console.log(response.data);
+                    }
+                }
+            } catch (error) {
+                console.log(error);
+            }
+        })
+        .catch((error)=>{
+            console.log(error.response);
+        });
     } catch (error) {
         
     }
@@ -111,14 +133,15 @@ async function commands(dtObject){
             
             case EnumTv.PING: sendPong(); break;
             case EnumTv.PONG: break;
-            case EnumTv.CONNECTION_IS_NOT_SAVED:
+
+            /*case EnumTv.CONNECTION_IS_NOT_SAVED:
                 let isUpdateScreen = await DAO.DB.get('IsLinkedTv');
                 await DAO.DB.set('IsConnected', false);
                 await DAO.DB.set('IsLinkedTv', false);
                 if(isUpdateScreen){
                     receiver({code: "update_screen"});
                 }
-            break;
+            break;*/
 
             case EnumTv.GETINFO_TV:
                 GetInfoTv();
@@ -126,23 +149,6 @@ async function commands(dtObject){
 
             case EnumTv.CHECK_APP_UPDATES:
                 receiver({code: "CHECK_APP_UPDATES"});
-            break;
-
-            case EnumTv.INFO_TV:
-                if(dtObject.data != null){
-                    let isLinked = await DAO.DB.get('IsLinkedTv');
-                    await DAO.DB.set('IsLinkedTv', true);
-                    await DAO.DB.set('DataTv', dtObject.data);
-                    await DAO.DB.set('PlayerState', dtObject.data.play_pause);
-                    await DAO.DB.set('RandomReproduction', dtObject.data.reproducaoRand);
-                    await DAO.DB.set('IsConnected', true);
-                    if(isLinked != true) receiver({code: "update_screen"});
-                    if(!TimeLineDownload.isDownloading){
-                        Commun.CheckBlocksUpdates(dtObject.data, Socket);
-                    }
-                    receiver({code: "data_tv", data: dtObject.data});
-                    checkTvToMute();
-                }
             break;
 
             case EnumTv.BAIXAR_TIMELINE:
@@ -155,7 +161,7 @@ async function commands(dtObject){
                     Socket.send(JSON.stringify({ code: DAO.TvCode, token_conection: null, tv_name: await getNameTv(), data: {response: "download_runing"}, cmd: EnumTv.CALLBACK }));
                 }
             break;
-
+        /*
             case EnumTv.GET_PREVIW_INSTAGRAM:
                 if(dtObject.data != null && dtObject.data.username_instagram != null){
                     let token_conection_id = dtObject.data.token_conection_id;
@@ -198,6 +204,7 @@ async function commands(dtObject){
                     }
                 }
             break;
+        */
 
             case EnumTv.UPDATE_TV:
                 Socket.send(JSON.stringify({ code: DAO.TvCode, token_conection: null, tv_name: await getNameTv(), data: {response: "UPDATE_TV"}, cmd: EnumTv.CALLBACK }));
@@ -207,15 +214,12 @@ async function commands(dtObject){
                     await DAO.DB.set('link_tv', "no_link");
                     await DAO.DB.set('IsLinkedTv', false);
                     await DAO.DB.set("reloadApp", true)
-                    Socket.close();
                     receiver({code: "update_screen"});
                 }else if(dtObject.data == "UPDATE_INFOTV"){
                     let timeDownloadedTimeLine = await DAO.DB.get('timeDownloadedTimeLine');
                     let isUpdateApp = DAO.DB.get('AppUpdate');
-                    if(isUpdateApp == null || isUpdateApp == "null")
-                      isUpdateApp = false;
-                    if(timeDownloadedTimeLine == null || timeDownloadedTimeLine == "null")
-                      timeDownloadedTimeLine = "";
+                    if(isUpdateApp == null || isUpdateApp == "null") isUpdateApp = false;
+                    if(timeDownloadedTimeLine == null || timeDownloadedTimeLine == "null") timeDownloadedTimeLine = "";
                     await DAO.DB.remove('AppUpdate');
                     GetInfoTv();
                 }
@@ -247,47 +251,18 @@ async function commands(dtObject){
                 Socket.send(JSON.stringify({ code: DAO.TvCode, token_conection: null, tv_name: await getNameTv(), data: { response: "player", player: STOP, timeline: idTl, }, cmd: EnumTv.CALLBACK }));
             break;
 
-            case EnumTv.UPDATE_CONFIG_JSON:
-                Commun.updateConfigJson(path.join(app.getAppPath(), '/config.json'), dtObject.data.newConfigJson, (res)=>{
-                    if(res){
-                        Socket.send(JSON.stringify({code: DAO.TvCode, token_conection: null, data: { response: "UPDATE_CONFIG_JSON", msg: "Alterado com sucesso!" }, cmd: EnumTv.CALLBACK}));
-                    }
-                    else{
-                        Socket.send(JSON.stringify({code: DAO.TvCode, token_conection: null, data: { response: "UPDATE_CONFIG_JSON", msg: "Arquivo não alterado!" }, cmd: EnumTv.CALLBACK}));
-                    }
-                });
-            break;
+            case EnumTv.CALLBACK: break;
 
-            case EnumTv.CALLBACK:
-                if(dtObject.data.response === EnumTv.SAVE_DATA_INSTAGRAM){
-                    if(dtObject.data.updateBloco == true){
-                      Socket.send(JSON.stringify({ code: DAO.TvCode, token_conection: null, data: {bloco_id: dtObject.data.bloco_id, updateBloco: dtObject.data.updateBloco},  cmd: EnumTv.ATUALIZAR_BLOCO_WS }));
-                    }
-                }
-                else{
-                    //console.log(dtObject);
-                }
-            break;
+            case EnumTv.REMOVE_TAG_UPDATE: break;
 
-            case EnumTv.REMOVE_TAG_UPDATE:
-                
-            break;
+            case EnumTv.REMOVE_ITEM_BLOCK_UPDATE: break;
 
-            case EnumTv.DELETE_BLOCK_UPDATE:
-                
-            break;
+            case EnumTv.PUBLISHED: break;
 
-            case EnumTv.PUBLISHED:
-                
-            break;
-
-            case EnumTv.TV_LOG:
-                
-            break;
+            case EnumTv.TV_LOG: break;
         
             default:
-                if(dtObject.cmd)
-                    console.log(dtObject.cmd);
+                if(dtObject.cmd) console.log(dtObject.cmd);
                 //console.log(dtObject);
             break;
         }
@@ -319,6 +294,20 @@ async function sendLogWs(data){
     let infoTv = await DAO.DB.get('DataTv');
     let nameTv = null
     if(infoTv && infoTv.nome) nameTv = infoTv.nome
+
+    try {
+        Api.Send(EnumTv.TV_LOG, {
+            code: await DAO.GetTvCode(),
+            json: JSON.stringify({ code: DAO.TvCode, tv_name: nameTv, data: data, cmd: EnumTv.TV_LOG }),
+        }).then(async (response)=>{
+
+        })
+        .catch((error)=>{
+            console.log(error.response);
+        });
+    } catch (error) {
+        console.log(error);
+    }
     Socket.send(JSON.stringify({ code: DAO.TvCode, tv_name: nameTv, data: data, cmd: EnumTv.TV_LOG }));
 }
 
@@ -339,7 +328,7 @@ async function CheckTimeLineDownloaded() {
         if(dataTV && ( !dataTV.checkTLOnStart || dataTV.checkTLOnStart === true)){
             if(!TimeLineDownload.isDownloading){
                 if(!dataPlayer || dataPlayer.length === 0){
-                    if(dataToVerify.data && dataToVerify.data.length > 0){
+                    if(dataToVerify && dataToVerify.data && dataToVerify.data.length > 0){
                         if(!Commun.isDateMoreThanOneDayFromNow(dataToVerify.date)){
                             TimeLineDownload.StartDownload(dataToVerify.data, (data) => { });
                         }
@@ -353,10 +342,6 @@ async function CheckTimeLineDownloaded() {
     } catch (error) {
         console.log(error);
     }
-}
-
-function randomBetween(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 module.exports = {

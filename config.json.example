@@ -1,20 +1,14 @@
 {
     "URL_SITE" : "https://sistema.pcmidiaooh.com.br",
-    "URL_API" : "https://sistema.pcmidiaooh.com.br/?ng=api/",
-    "URL_WEBSOCKET" : "wss://sistema.pcmidiaooh.com.br:8080",
+    "URL_API": "https://pcmidia-dev.minasforce.com.br/?ng=tv-api",
+    "API_KEY": "key_api_value",
+    "URL_WEBSOCKET" : "wss://wss-pcmidia-dev.minasforce.com.br",
     "URL_CACHE_DEPENDENCE" :"",
     "URL_CHROMIUM_DOWNLOAD": "https://sistema.pcmidiaooh.com.br/application/storage/dependencies-app/local-chromium.zip",
-    "KEY_API":"key_api_value",
     "USER_NAME_INSTAGRAM" : "",
     "USER_PASSWORD_INSTAGRAM" : "",
     "NAME_FOLDER_DATA" : "data",
     "NAME_FOLDER_LOGS" : "logs",
     "SYSTEM" : "WINDOWS",
-    "VERSION_TYPE": "release",
-    "LIST_USERES_NOTIFY": [
-        {
-            "name":"phone_username_1",
-            "number": "phone_number_1"
-        }
-    ]
+    "VERSION_TYPE": "release"
 }

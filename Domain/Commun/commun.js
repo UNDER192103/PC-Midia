@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const https = require('https');
 const extractZip = require('extract-zip');
+const Api = require(path.join(app.getAppPath(), "Repository", "api.js"));
 const DAO = require(path.join(app.getAppPath(), "Repository", "DB.js"));
 const post_model = require(path.join(app.getAppPath(), "Domain", "Models", "PostModel.js"));
 const TagUpdaterService = require(path.join(app.getAppPath(), "Domain", "Service", "tagUpdater.js"));
@@ -115,7 +116,7 @@ function updateConfigJson(dirConfigJson, newDataConfigJson, callback){
 }
 
 function ReiniciarWindows(){
-    console.log('Reiniciando...');
+    //console.log('Reiniciando...');
     exec('shutdown /r', (err, stdout, stderr) => {
     
     });
@@ -209,7 +210,17 @@ async function CheckBlocksUpdates(Data, Socket) {
                 try {
                     if(TagUpdater.isDownloading == false){
                         let DtoTagUpdate = JSON.parse(Data.json_tag_update);
-                        Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await TagUpdater.getNameTv(), data: {response: 'finish_update', tag_date: null, id: Data.id_tag_update}, cmd: EnumTv.REMOVE_TAG_UPDATE}));
+                        //Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await TagUpdater.getNameTv(), data: {response: 'finish_update', tag_date: null, id: Data.id_tag_update}, cmd: EnumTv.REMOVE_TAG_UPDATE}));
+                        Api.Send(EnumTv.REMOVE_TAG_UPDATE, {
+                            code: await DAO.TvCode,
+                            json: JSON.stringify({response: 'finish_update', tag_date: null, id: Data.id_tag_update})
+                        }).then(async (response)=>{
+                            try {
+                                //console.log(response.data);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }).catch((error)=>{console.log(error.response)});
                         if(DtoTagUpdate && DtoTagUpdate.tag && DtoTagUpdate.tag.infobloco.length > 0){
                             TagUpdater.StartDownload(DtoTagUpdate, async (DataTagToUpdate)=>{
                                 if(DataTagToUpdate != null){
@@ -240,11 +251,22 @@ async function CheckBlocksUpdates(Data, Socket) {
             if(Data.dataUpdateBlock != null && Data.dataUpdateBlock.length > 0){
                 if(BlockUpdater.isDownloading == false && Data.dataUpdateBlock.length > 0){
                     Data.dataUpdateBlock.forEach(async elemt => {
-                        Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await BlockUpdater.getNameTv(), data: {response: 'remove_block_update', id: elemt.id, date: elemt.date}, cmd: EnumTv.DELETE_BLOCK_UPDATE}));
+                        //Socket.send(JSON.stringify({code: DAO.TvCode, tv_name: await BlockUpdater.getNameTv(), data: {response: 'remove_block_update', id: elemt.id, date: elemt.date}, cmd: EnumTv.REMOVE_ITEM_BLOCK_UPDATE}));
+                        Api.Send(EnumTv.REMOVE_ITEM_BLOCK_UPDATE, {
+                            code: await DAO.TvCode,
+                            json: JSON.stringify({response: 'remove_block_update', id: elemt.id, date: elemt.date})
+                        }).then(async (response)=>{
+                            try {
+                               // console.log(response.data);
+                            } catch (error) {
+                                console.log(error);
+                            }
+                        }).catch((error)=>{console.log(error.response)});
                     });
                     BlockUpdater.StartDownload(Data.dataUpdateBlock, async (listToUpdate) => {
                         await DAO.DB.set('DownloadPercentage', null);
                         let DataPlayerNow = await DAO.TIMELINE.get('DataPlayer');
+                        if(!DataPlayerNow || !Array.isArray(DataPlayerNow)) DataPlayerNow = [];
                         let TimeLineUpdated = DataPlayerNow.map( ( item ) => {
                             let itemToUpdate = listToUpdate.find( itemToUpdate => itemToUpdate.id_item_complet == item.id_item_complet);
                             if(itemToUpdate){
@@ -364,7 +386,7 @@ async function copiarTexto(texto) {
     try {
         const ncp = require('copy-paste');
         ncp.copy(texto, function() {
-            console.log('Texto copiado com sucesso!');
+           // console.log('Texto copiado com sucesso!');
         });
     } catch (error) {
       console.error('Erro ao copiar texto:', error);

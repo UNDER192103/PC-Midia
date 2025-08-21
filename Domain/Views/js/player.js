@@ -21,13 +21,13 @@ function checkDataPlayer(verify = false){
                     if(actul_item){
                         item.oldData = item.data.map(e => {
                             if(actul_item.oldData){
-                                if(actul_item.oldData.find(ee => ee.blocoId === e.blocoId)) return e;
+                                if(actul_item.oldData.find(ee => ee.diretorio === e.diretorio)) return e;
                             }
                             return null;
                         }).filter(f => f != null);
                         item.data = item.data.map(e => {
                             if(actul_item.data){
-                                if(actul_item.data.find(ee => ee.blocoId === e.blocoId)) return e;
+                                if(actul_item.data.find(ee => ee.diretorio === e.diretorio)) return e;
                             }
                             return null;
                         }).filter(f => f != null);
@@ -84,10 +84,7 @@ async function player() {
                             saveNowIdBlockReproduct(item.data.blocoId, item.data.type);   
                         } catch (error) { }
                         
-                        if(item.data.type == "RSS"){
-                            console.log(item)
-                        }
-                        else if(item.data.type != "VIDEO"){
+                        if(item.data.type != "VIDEO"){
                             $(".img").attr("src", "");
                             $('.reprodutor-html').remove();
                             $('.div-reprodutor-html').html('<object type="text/html" data="" class="reprodutor-html hidden"></object>');
@@ -167,14 +164,13 @@ async function player() {
                     }
                 }
                 var dto = item.data[posNow];
-                
                 if(dto != null){
                     check_file_existe(dto.diretorio, (is_exist)=>{
                         if(is_exist){
                             try {
                                 saveNowIdBlockReproduct(dto.blocoId, dto.type);   
                             } catch (error) {  }
-
+                            
                             if(dto.type != "VIDEO"){
                                 $(".img").attr("src", "");
                                 $('.reprodutor-html').remove();
@@ -245,6 +241,24 @@ async function player() {
                                 dataPlayer[dt.contPosBloco].pos = 0;
                             }
 
+                            dataPlayer.forEach(element => {
+                                if(element.name_Tag == item.name_Tag){
+                                    if(element.data.length >= 1){
+                                        if(element.noArray != true){
+                                            element.oldData.push(element.data[posNow]);
+                                            element.data = element.data.filter(f => f.diretorio != dto.diretorio);
+                                            element.data = shuffleArray(element.data);
+                                        }
+                                    }
+                                    else{
+                                        if(element.noArray != true){
+                                            element.data = element.oldData;
+                                            element.oldData = new Array();
+                                        }
+                                    }
+                                }
+                            });
+
                             if(dto.type != "VIDEO"){
                                 set_timeout();
                             }
@@ -272,6 +286,27 @@ async function player() {
                                 }
                             } catch (error) { }
                             tempoRespoducao = 0;
+                            try {
+                                dataPlayer.forEach(element => {
+                                    if(element.name_Tag == item.name_Tag){
+                                        if(element.data.length >= 1){
+                                            if(element.noArray != true){
+                                                element.oldData.push(element.data[posNow]);
+                                                element.data = element.data.filter(f => f.diretorio != dto.diretorio);
+                                                element.data = shuffleArray(element.data);
+                                            }
+                                        }
+                                        else{
+                                            if(element.noArray != true){
+                                                element.data = element.oldData;
+                                                element.oldData = new Array();
+                                            }
+                                        }
+                                    }
+                                });   
+                            } catch (error) {
+                                console.log(error);
+                            }
                             set_timeout();
                         }
                     });
@@ -578,7 +613,7 @@ function updateDataPlayerNoReload(){
             }
             if(JSON.stringify(newData) != JSON.stringify(dataPlayer)){
                 dataPlayer = newData;
-                console.log('Update Data ok')
+                //console.log('Update Data ok')
             }
         }
     });

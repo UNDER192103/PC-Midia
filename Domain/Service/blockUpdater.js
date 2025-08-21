@@ -115,8 +115,8 @@ class BlockUpdater {
     }
 
     async DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, Callback){
-        let postDirFile = path.join(dirBlock, `user-post-${this._posDII}.${block.video_url != null ? "mp4" : "png"}`);
-        let urlFile = block.video_url != null ? block.video_url : block.url;
+        let postDirFile = path.join(dirBlock, `user-post-${this._posDII}.${block.video_url != null && block.video_url != '' ? "mp4" : "png"}`);
+        let urlFile = block.video_url != null && block.video_url != '' ? block.video_url : block.url;
         this.DownloadFileByUrl(Item, dataBlock.nomeBloco, urlFile, postDirFile).then(async ()=>{
             Callback(postDirFile);
         })
@@ -153,36 +153,39 @@ class BlockUpdater {
 
     async DownloadFilesInstagram(Item, block, dataBlock, dirBlock, Callback){
         this.DownlaodUserInstagramAvatar(Item, block, dataBlock, dirBlock, (userAvatarDirFile)=>{
-            if(userAvatarDirFile){
-                this.DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, (userPostDirFile)=>{
-                    if(userPostDirFile){
-                        this.DownloadBlockLogo(Item, dataBlock, dirBlock, (dirBlockLogo)=>{
-                            if(dirBlockLogo){
-                                let UrlHtml = `${DAO.Config.URL_SITE}/?ng=block/image-generator/${dataBlock.tipoBlock.toLowerCase()}/${block.bloco}/2/${this._posDII}`;	
-                                this.GetPageByUrl(UrlHtml).then(async (Html) => {
-                                    if(Html != null){
-                                        Html = Html.replaceAll("url_file_video", userPostDirFile);
-                                        Html = Html.replaceAll("url_file_main", userPostDirFile);
-                                        Html = Html.replace("url_file_avatar", userAvatarDirFile);
-                                        if(dirBlockLogo != true) Html = Html.replace("url_file_logo", dirBlockLogo);
-                                        let dirFileHtml = path.join(dirBlock, `user-post-${this._posDII}.html`);
-                                        this.CreateFileByData(dirFileHtml, Html).then(async (isCreated)=>{
-                                            if(isCreated){
-                                                this.CheckExisteValidFile(dirFileHtml, (isInvalidFile) => {
-                                                    if(isInvalidFile === false){
-                                                        Callback(
-                                                            {
-                                                                dir: dirFileHtml,
-                                                                id: block.bloco,
-                                                                duration: block.duration,
-                                                                type: dataBlock.tipoBlock
-                                                            }
-                                                        );
+            this.DownlaodUserInstagramPost(Item, block, dataBlock, dirBlock, (userPostDirFile)=>{
+                if(userPostDirFile){
+                    this.DownloadBlockLogo(Item, dataBlock, dirBlock, (dirBlockLogo)=>{
+                        let UrlHtml = `${DAO.Config.URL_SITE}/?ng=block/image-generator/${dataBlock.tipoBlock.toLowerCase()}/${block.bloco}/2/${this._posDII}`;	
+                        this.GetPageByUrl(UrlHtml).then(async (Html) => {
+                            if(Html != null){
+                                Html = Html.replaceAll("url_file_video", userPostDirFile);
+                                Html = Html.replaceAll("url_file_main", userPostDirFile);
+                                if(userAvatarDirFile){
+                                    Html = Html.replace("url_file_avatar", userAvatarDirFile);
+                                }
+                                else{
+                                    Html = Html.replace("url_file_avatar", '');
+                                }
+                                if(dirBlockLogo){
+                                    Html = Html.replace("url_file_logo", dirBlockLogo);
+                                }
+                                else{
+                                    Html = Html.replace("url_file_logo", '');
+                                }
+                                let dirFileHtml = path.join(dirBlock, `user-post-${this._posDII}.html`);
+                                this.CreateFileByData(dirFileHtml, Html).then(async (isCreated)=>{
+                                    if(isCreated){
+                                        this.CheckExisteValidFile(dirFileHtml, (isInvalidFile) => {
+                                            if(isInvalidFile === false){
+                                                Callback(
+                                                    {
+                                                        dir: dirFileHtml,
+                                                        id: block.bloco,
+                                                        duration: block.duration,
+                                                        type: dataBlock.tipoBlock
                                                     }
-                                                    else{
-                                                        Callback(null);
-                                                    }
-                                                });
+                                                );
                                             }
                                             else{
                                                 Callback(null);
@@ -198,15 +201,12 @@ class BlockUpdater {
                                 Callback(null);
                             }
                         });
-                    }
-                    else{
-                        Callback(null);
-                    }
-                });
-            }
-            else{
-                Callback(null);
-            }
+                    });
+                }
+                else{
+                    Callback(null);
+                }
+            });
         });
     }
 

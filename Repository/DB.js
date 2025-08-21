@@ -79,7 +79,7 @@ class LOGGER {
         let list = await this.DB.get(type);
         if(!list) list = [];
         list.push(data);
-        console.log(data);
+        //console.log(data);
         return await this.DB.set(type, list);
     }
 

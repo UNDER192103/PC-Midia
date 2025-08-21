@@ -9,6 +9,7 @@ let paths_appdata = [
     path.join(app.getPath('userData'), 'Data', 'Storage', 'Timelines'),
     path.join(app.getPath('userData'), 'Data', 'Storage', 'Posts-Instagram'),
 ];
+
 const check_folders_data_UN = async (callback) => {
     for (let index = 0; index < paths_appdata.length; index++) {
         if (!await fs.existsSync(paths_appdata[index])) {
