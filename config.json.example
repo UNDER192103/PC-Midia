@@ -1,6 +1,6 @@
 {
     "URL_SITE" : "https://sistema.pcmidiaooh.com.br",
-    "URL_API": "https://pcmidia-dev.minasforce.com.br/?ng=tv-api",
+    "URL_API": "https://sistema.pcmidiaooh.com.br/?ng=tv-api",
     "API_KEY": "key_api_value",
     "URL_WEBSOCKET" : "wss://sistema.pcmidiaooh.com.br:8888",
     "URL_CACHE_DEPENDENCE" :"",

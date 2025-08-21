@@ -63,10 +63,9 @@ async function GetInfoTv(callback = null){
     try {
         let timeDownloadedTimeLine = await DAO.DB.get('timeDownloadedTimeLine');
         Api.Send(EnumTv.INFO_TV, {
+            app_version: DAO.Package.version,
+            app_status: DAO.Package.status,
             code: await DAO.GetTvCode(),
-            json: JSON.stringify({
-                app_info: JSON.stringify({status: DAO.Package.status,name: DAO.Package.productName,version: DAO.Package.version})
-            }),
             version: timeDownloadedTimeLine ? timeDownloadedTimeLine : "",
         }).then(async (response)=>{
             try {

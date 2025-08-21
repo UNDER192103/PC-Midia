@@ -1,8 +1,8 @@
 {
-  "name": "risenmidia-dev",
+  "name": "risenmidia",
   "version": "2.0.17",
-  "description": "Risen Midia Dev",
-  "productName": "Risen Midia Dev",
+  "description": "Risen Midia",
+  "productName": "Risen Midia",
   "main": "index.js",
   "status": "release",
   "scripts": {
@@ -18,7 +18,7 @@
   "build": {
     "asar": false,
     "appId": "com.UNDER192103.risenmidia",
-    "productName": "Risen Midia Dev",
+    "productName": "Risen Midia",
     "win": {
       "target": "nsis",
       "requestedExecutionLevel": "asInvoker",
