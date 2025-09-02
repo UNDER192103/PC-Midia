@@ -10,7 +10,7 @@
     "start": "electron .",
     "build": "electron-builder"
   },
-  "repository": "https://github.com/UNDER192103/PC-Midia",
+  "repository": "https://github.com/UNDER192103/Risen-Midia",
   "publish": {
     "provider": "github",
     "releaseType": "release"
@@ -36,7 +36,7 @@
       "output": "build"
     }
   },
-  "homepage": "https://github.com/UNDER192103/PC-Midia",
+  "homepage": "https://github.com/UNDER192103/Risen-Midia",
   "author": {
     "name": "UNDER NOUZEN",
     "email": "undernouzen@gmail.com",
