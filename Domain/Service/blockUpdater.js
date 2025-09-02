@@ -52,6 +52,7 @@ class BlockUpdater {
     async DownloadFileByUrl(Block, nameBlock, url, dir){
             return new Promise(async (resolve, reject) => {
                 try {
+                    url = url.replaceAll('/usr/share/nginx/', 'https://');
                     const response = await axios.get(url, {
                       responseType: 'arraybuffer',
                       onDownloadProgress: (progressEvent) => {

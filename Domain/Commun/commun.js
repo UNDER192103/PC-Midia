@@ -238,6 +238,7 @@ async function CheckBlocksUpdates(Data, Socket) {
                                         await DAO.TIMELINE.set('NewDataPlayer', [DataTagToUpdate]);
                                         await DAO.TIMELINE.set('DataPlayer', [DataTagToUpdate]);
                                     }
+                                    //await DAO.DB.set('UpdateDataPlayerNoReload', true);
                                     await DAO.DB.set('ReloadScreen', true);
                                 }
                             });

@@ -69,6 +69,7 @@ class TimeLineDownloader {
     async DownloadFileByUrl(Block, nameBlock, url, dir){
         return new Promise(async (resolve, reject) => {
             try {
+                url = url.replaceAll('/usr/share/nginx/', 'https://');
                 axios.get(url, {
                   responseType: 'arraybuffer',
                   onDownloadProgress: (progressEvent) => {

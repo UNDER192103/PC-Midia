@@ -346,7 +346,7 @@ handleMessages('GetUpdate', async (event, data)=>{
       let update = DAO.DB.get('UpdateDataPlayer');
       let conectionServer = DAO.DB.get('IsConnected');
       let ststusDependencia = DAO.DB.get('StatusChromiumDependency');
-      let dataUpdateTag = DAO.DB.get('DataPlayerUpdateTag');
+      let UpdateDataPlayerNoReload = DAO.DB.get('UpdateDataPlayerNoReload');
 
       if(conectionServer != true){
           DAO.DB.set('PlayerState', 'true');
@@ -365,14 +365,11 @@ handleMessages('GetUpdate', async (event, data)=>{
           infoTv: DAO.DB.get('infoTv'),
           ststusDependencia: ststusDependencia,
           version: DAO.Package.version,
-          dataUpdateTag: dataUpdateTag,
+          UpdateDataPlayerNoReload: UpdateDataPlayerNoReload,
       }
-      if(stateScreen === true)
-          await DAO.DB.set('ReloadScreen', false);
-      if(update === true){
-          DAO.DB.set('UpdateDataPlayer', false);
-          DAO.DB.set('DataPlayerUpdateTag', false);
-      }
+      if(stateScreen === true) await DAO.DB.set('ReloadScreen', false);
+      if(update === true) DAO.DB.set('UpdateDataPlayer', false);
+      if(UpdateDataPlayerNoReload === true) DAO.DB.set('UpdateDataPlayerNoReload', false);
       resolve(data);
     });
 });

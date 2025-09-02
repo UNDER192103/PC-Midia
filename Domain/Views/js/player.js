@@ -19,17 +19,16 @@ function checkDataPlayer(verify = false){
                     if(!item.oldData) item.oldData = new Array();
                     let actul_item = dataPlayer.find(f => f.id_item_complet === item.id_item_complet);
                     if(actul_item){
-                        item.oldData = item.data.map(e => {
+                        item.oldData = item.data.map(eItem => {
                             if(actul_item.oldData){
-                                if(actul_item.oldData.find(ee => ee.diretorio === e.diretorio)) return e;
+                                if(actul_item.oldData.find(ee => ee.diretorio === eItem.diretorio)) return eItem;
                             }
                             return null;
                         }).filter(f => f != null);
-                        item.data = item.data.map(e => {
-                            if(actul_item.data){
-                                if(actul_item.data.find(ee => ee.diretorio === e.diretorio)) return e;
-                            }
-                            return null;
+                        
+                        item.data = item.data.map(eItem => {
+                            if(item.oldData.find(ee => ee.diretorio === eItem.diretorio)) return null;
+                            return eItem;
                         }).filter(f => f != null);
                     }
                     return item;
@@ -43,7 +42,7 @@ function checkDataPlayer(verify = false){
                 for (let index = 0; index < dataPlayer.length; index++) {
                     dataPlayer[index]["oldData"] = new Array();
                 }
-            }
+            }            
         }else{
             validDataPlayer = data;
         }
@@ -517,6 +516,7 @@ function validPlayer(r) {
 
 function reloadScreen(r){
     if(r === true){
+        checkDataPlayer();
         //location.reload();
     }else{
     }
@@ -542,7 +542,7 @@ function downloadRuning(data){
 
 function getUpdate(){
     BACKEND.Send('GetUpdate').then((data) => {
-        if(data.dataUpdateTag == "true"){
+        if(data.UpdateDataPlayerNoReload == "true"){
             updateDataPlayerNoReload()
         }
         tvCode = data.tvCode;
